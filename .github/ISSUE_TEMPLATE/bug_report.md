@@ -1,8 +1,11 @@
-name: Bug Report
-description: File a bug report
-title: "[Bug]: "
-labels: ["bug"]
-body:
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: bug
+assignees: ''
+
+---
 
 # Summary
 
@@ -32,5 +35,3 @@ body:
 ## Possible fixes
 
 (If you can, link to the line of code that might be responsible for the problem)
-
-/label ~bug
