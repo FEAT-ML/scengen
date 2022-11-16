@@ -1,7 +1,7 @@
 name: Feature Request
 description: File a feature request
 title: "[Request]: "
-labels: ["request"]
+labels: ["enhancement"]
 body:
 
 # Request Summary
