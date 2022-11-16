@@ -1,8 +1,11 @@
-name: Feature Request
-description: File a feature request
-title: "[Request]: "
-labels: ["enhancement"]
-body:
+---
+name: Feature request
+about: Suggest an idea for this project
+title: ''
+labels: enhancement
+assignees: ''
+
+---
 
 # Request Summary
 (Summarize your idea or feature you request)
