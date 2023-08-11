@@ -8,7 +8,7 @@ import logging
 
 from logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
-from scengen.runner import run_amiris
+from scengen.runner import call_amiris
 
 
 def scengen() -> None:
@@ -24,9 +24,11 @@ def scengen() -> None:
         while i < n_to_generate:
             logging.debug("Calling generator")
             # call generator
-            scenario_name = "Test"  # to be defined by generator
+            scenario_name = "scenario.yaml"  # to be defined by generator
+
             logging.debug("Calling runner")
-            run_amiris(options, scenario_name)
+            call_amiris(options, scenario_name)
+
             logging.debug("Calling evaluator")
             # call evaluator
             positive_evaluation = True

@@ -65,7 +65,7 @@ def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
     subparsers = parent_parser.add_subparsers(dest="command", required=True, help=SCENGEN_COMMAND_HELP)
 
     create_parser = subparsers.add_parser("create", help=CREATE_HELP)
-    create_parser.add_argument("--number", "-n", default=CREATE_N_DEFAULT, help=CREATE_N_HELP)
+    create_parser.add_argument("--number", "-n", type=int, default=CREATE_N_DEFAULT, help=CREATE_N_HELP)
     create_parser.add_argument("--jar", "-j", type=Path, required=True, help=CREATE_JAR_HELP)
     create_parser.add_argument("--directory", "-d", type=Path, default=Path("./"), help=CREATE_DIR_HELP)
 

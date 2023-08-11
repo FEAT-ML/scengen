@@ -53,7 +53,7 @@ Christoph Schimeczek, Kristina Nienhaus, Ulrich Frey, Evelyn Sperber, Seyedfarza
 
 and 
 
-Felix Nitsch, Ulrich Frey, Christoph Schimeczek (2023). scengen: A Scenario generator for creating scenarios for the open electricity market model AMIRIS. GitHub. https://github.com/FEAT-ML/scenario-generator 
+Felix Nitsch, Ulrich Frey, Christoph Schimeczek (2023). scengen: A scenario generator for the open electricity market model AMIRIS. GitHub. https://github.com/FEAT-ML/scenario-generator 
 
 
 ## Contributing
