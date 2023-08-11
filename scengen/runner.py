@@ -13,7 +13,6 @@ from scengen.cli import CreateOptions, GeneralOptions
 
 
 NAME_SCENARIO_YAML = "scenario.yaml"
-NAME_RESULTS_FOLDER = "results"
 
 
 def call_amiris(options: dict, scenario_name: str) -> None:
@@ -26,7 +25,7 @@ def call_amiris(options: dict, scenario_name: str) -> None:
 def map_options(options: dict, scenario_name: str) -> dict:
     """Maps values from scengen `options` and `scenario_name` to option keys of amirispy"""
     options[amiris.RunOptions.JAR] = options[CreateOptions.JAR]
-    options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY], NAME_RESULTS_FOLDER)
+    options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY], scenario_name)
     options[AMIRISGeneralOptions.LOG] = options[GeneralOptions.LOG]
     options[AMIRISGeneralOptions.LOGFILE] = options[GeneralOptions.LOGFILE]
     options[amiris.RunOptions.SCENARIO] = Path(options[CreateOptions.DIRECTORY], scenario_name, NAME_SCENARIO_YAML)
