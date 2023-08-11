@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
+import logging
 
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
+
+from logs import log_and_print, set_up_logger
+from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
 
 
 def scengen() -> None:
@@ -11,10 +15,26 @@ def scengen() -> None:
     set_up_logger(options[GeneralOptions.LOG], options[GeneralOptions.LOGFILE])
     log_and_print("Starting scenario generator")
 
-    # get number n of scenarios to create
-    # while i < n
-    # call generator
-    # call runner
-    # call evaluator
+    if command is Command.CREATE:
+        log_and_print("Starting to create scenarios")
+        n_to_generate = options[CreateOptions.NUMBER]
+        i = 0
+        while i < n_to_generate:
+            logging.debug("Calling generator")
+            # call generator
+            logging.debug("Calling runner")
+            # call runner
+            logging.debug("Calling evaluator")
+            # call evaluator
+            positive_evaluation = True
+            if positive_evaluation:
+                i += 1
+                logging.info(f"Created {i}/{n_to_generate} scenarios.")
+            else:
+                logging.warning(f"Scenario did not pass evaluation. Restarting.")
 
-    log_and_print("Created X/X scenarios.")
+        log_and_print(f"Created {i}/{n_to_generate} scenarios.")
+
+
+if __name__ == "__main__":
+    scengen()
