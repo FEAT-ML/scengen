@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-import logging
 
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
+
 from logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
+from scengen.runner import run_amiris
 
 
 def scengen() -> None:
@@ -22,8 +24,9 @@ def scengen() -> None:
         while i < n_to_generate:
             logging.debug("Calling generator")
             # call generator
+            scenario_name = "Test"  # to be defined by generator
             logging.debug("Calling runner")
-            # call runner
+            run_amiris(options, scenario_name)
             logging.debug("Calling evaluator")
             # call evaluator
             positive_evaluation = True
