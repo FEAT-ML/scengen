@@ -5,10 +5,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+import shutil
+from pathlib import Path
 
 from logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
-from scengen.runner import run_amiris
+from scengen.runner import call_amiris, NAME_SCENARIO_YAML
+from scengen.evaluator import evaluation
 
 
 def scengen() -> None:
@@ -24,16 +27,18 @@ def scengen() -> None:
         while i < n_to_generate:
             logging.debug("Calling generator")
             # call generator
-            scenario_name = "Test"  # to be defined by generator
+            scenario_name = "Germany2019"  # to be defined by generator
+
             logging.debug("Calling runner")
-            run_amiris(options, scenario_name)
+            call_amiris(options, scenario_name)
+
             logging.debug("Calling evaluator")
-            # call evaluator
-            positive_evaluation = True
+            positive_evaluation = evaluation(options, scenario_name)
             if positive_evaluation:
                 i += 1
                 logging.info(f"Created {i}/{n_to_generate} scenarios.")
             else:
+                shutil.rmtree(Path(options[CreateOptions.DIRECTORY], scenario_name, Path(NAME_SCENARIO_YAML).stem))
                 logging.warning(f"Scenario did not pass evaluation. Restarting.")
 
         log_and_print(f"Created {i}/{n_to_generate} scenarios.")
