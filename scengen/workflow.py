@@ -24,15 +24,14 @@ def scengen() -> None:
         while i < n_to_generate:
             logging.debug("Calling generator")
             # call generator
-            scenario_name = "scenario.yaml"  # to be defined by generator
+            scenario_name = "Germany2019"  # to be defined by generator
 
             logging.debug("Calling runner")
             call_amiris(options, scenario_name)
 
             logging.debug("Calling evaluator")
-            # call evaluator
-            positive_evaluation = True
-            if positive_evaluation:
+            evaluation = evaluation(scenario_name)
+            if evaluation is True:
                 i += 1
                 logging.info(f"Created {i}/{n_to_generate} scenarios.")
             else:
