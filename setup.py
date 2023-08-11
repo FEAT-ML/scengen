@@ -55,6 +55,7 @@ setup(
     ],
     install_requires=[
         "amirispy>=1.3,<2",
+        "pandas>2.0,<3",
     ],
     extras_require={"dev": ["pytest>=7.2"]},
     include_package_data=True,

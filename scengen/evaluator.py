@@ -10,7 +10,7 @@ from scengen.cli import CreateOptions
 from scengen.runner import NAME_SCENARIO_YAML
 
 NAME_ENERGY_EXCHANGE = "EnergyExchange"
-NAME_ELECTRICITY_PRICE_COLUMN = "ElectricityPriceInEURperMWH"
+NAME_ELECTRICITY_PRICE_COLUMN = "ElectricityPriceInEURperMWH"  # noqa
 SCARCITY_PRICE = 3000
 THRESHOLD_SHARE_SCARCITY_HOURS = 0.10
 
