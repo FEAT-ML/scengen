@@ -53,7 +53,9 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
-    install_requires=[],
+    install_requires=[
+        "amirispy>=1.3,<2",
+    ],
     extras_require={"dev": ["pytest>=7.2"]},
     include_package_data=True,
     zip_safe=False,
