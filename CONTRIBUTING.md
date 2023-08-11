@@ -7,7 +7,7 @@ Welcome fellow researcher.
 We are happy that you want to contribute to and improve `scengen`.
 
 ## General information
-AMIRIS-Py is a bunch of Python tools intended to simplify working with [AMIRIS](https://gitlab.com/dlr-ve/esy/amiris/amiris/-/wikis/home).
+`scengen` is a scenario generator for the open agent-based electricity market model [AMIRIS](https://gitlab.com/dlr-ve/esy/amiris/amiris/-/wikis/home).
 It is an interdisciplinary, open source project, thus help is always appreciated!
 The development happens openly on GitLab and is supplemented by online developer meetings to discuss more complicated topics.
 
