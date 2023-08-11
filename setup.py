@@ -8,7 +8,7 @@ from setuptools import find_packages, setup
 
 __author__ = [
     "Felix Nitsch",  # noqa
-    "Ulrich Frey"  # noqa
+    "Ulrich Frey",  # noqa
     "Christoph Schimeczek",  # noqa
 ]
 __copyright__ = "Copyright 2023, German Aerospace Center (DLR)"
@@ -30,7 +30,14 @@ setup(
     description="Scenario generator for the open electricity market model AMIRIS",
     long_description=readme(),
     long_description_content_type="text/markdown",
-    keywords=["scenario", "generator", "AMIRIS", "agent-based modelling"],
+    keywords=[
+        "scenario",
+        "generator",
+        "AMIRIS",
+        "agent-based modelling",
+        "electricity market",
+        "simulation",
+    ],
     url="https://gitlab.com/dlr-ve/esy/amiris/",
     author=", ".join(__author__),
     author_email=__email__,
