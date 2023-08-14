@@ -33,11 +33,12 @@ Currently, there is one command available:
 ### `scengen create`
 Creates AMIRIS scenarios based on user defined input, estimates their plausibility, executes them by calling AMIRIS, and evaluates their final performance.  
 
-| Option                | Action                                                    |
-|-----------------------|-----------------------------------------------------------|
-| `-n` or `--number`    | Specify number of scenarios to be generated               |
-| `-j` or `--jar`       | Path to `amiris-core_<version>-jar-with-dependencies.jar` |
-| `-d` or `--directory` | Directory to parse scenarios from and write results to    |
+| Option                | Action                                                                            |
+|-----------------------|-----------------------------------------------------------------------------------|
+| `-n` or `--number`    | Specify number of scenarios to be generated                                       |
+| `-c` or `--config`    | Path to configuration YAML file defining specifications for creation of scenarios |
+| `-j` or `--jar`       | Path to `amiris-core_<version>-jar-with-dependencies.jar`                         |
+| `-d` or `--directory` | Directory to parse scenarios from and write results to                            |
 
 The procedure, handled by the `workflow.py`, is as follows:
 
