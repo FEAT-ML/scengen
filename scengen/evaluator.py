@@ -15,14 +15,12 @@ SCARCITY_PRICE = 3000
 THRESHOLD_SHARE_SCARCITY_HOURS = 0.10
 
 
-def evaluate_scenario(options: dict, scenario_name: str) -> bool:
+def evaluate_scenario(options: dict) -> bool:
     """
-    Evaluates results of `scenario_name` by checking of occurrences of SCARCITY_PRICE is within
-    THRESHOLD_SHARE_SCARCITY_HOURS
+    Evaluates results of scenario by checking of occurrences of SCARCITY_PRICE is within THRESHOLD_SHARE_SCARCITY_HOURS
 
     Args:
         options: options dictionary
-        scenario_name: name of current scenario
 
     Returns:
         True if occurrences of SCARCITY_PRICE is within THRESHOLD_SHARE_SCARCITY_HOURS, otherwise False
@@ -30,7 +28,7 @@ def evaluate_scenario(options: dict, scenario_name: str) -> bool:
     energy_exchange = pd.read_csv(
         Path(
             options[CreateOptions.DIRECTORY],
-            scenario_name,
+            options["scenario_name"],
             Path(NAME_SCENARIO_YAML).stem,
             f"{NAME_ENERGY_EXCHANGE}.csv",
         ),

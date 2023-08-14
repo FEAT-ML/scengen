@@ -15,20 +15,22 @@ from scengen.cli import CreateOptions, GeneralOptions
 NAME_SCENARIO_YAML = "scenario.yaml"
 
 
-def execute_scenario(options: dict, scenario_name: str) -> None:
-    """Calls AMIRIS after mapping `options` and `scenario_name` using amirispy functionality"""
-    options = map_options(options, scenario_name)
+def execute_scenario(options: dict) -> None:
+    """Calls AMIRIS after mapping `options` using amirispy functionality"""
+    options = map_options(options)
     amiris.run_amiris(options)
     delete_pb_files()
 
 
-def map_options(options: dict, scenario_name: str) -> dict:
-    """Maps values from scengen `options` and `scenario_name` to option keys of amirispy"""
+def map_options(options: dict) -> dict:
+    """Maps values from scengen `options` to option keys of amirispy"""
     options[amiris.RunOptions.JAR] = options[CreateOptions.JAR]
-    options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY], scenario_name)
+    options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"])
     options[AMIRISGeneralOptions.LOG] = options[GeneralOptions.LOG]
     options[AMIRISGeneralOptions.LOGFILE] = options[GeneralOptions.LOGFILE]
-    options[amiris.RunOptions.SCENARIO] = Path(options[CreateOptions.DIRECTORY], scenario_name, NAME_SCENARIO_YAML)
+    options[amiris.RunOptions.SCENARIO] = Path(
+        options[CreateOptions.DIRECTORY], options["scenario_name"], NAME_SCENARIO_YAML
+    )
     return options
 
 
