@@ -5,13 +5,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
-import shutil
-from pathlib import Path
 
 from logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
-from scengen.runner import call_amiris, NAME_SCENARIO_YAML
-from scengen.evaluator import evaluation
+from scengen.generator import generate_scenario
+from scengen.misc import delete_all_files
+from scengen.runner import execute_scenario
+from scengen.evaluator import evaluate_scenario
 
 
 def scengen() -> None:
@@ -25,20 +25,27 @@ def scengen() -> None:
         n_to_generate = options[CreateOptions.NUMBER]
         i = 0
         while i < n_to_generate:
+            scenario_name = "Germany2019"  # to be defined dynamically
             logging.debug("Calling generator")
-            # call generator
-            scenario_name = "Germany2019"  # to be defined by generator
+            generate_scenario(options, scenario_name)
+
+            # logging.debug("Calling estimator")
+            # positive_estimation = estimate_scenario()
+            # if not positive_estimation:
+            #     logging.warning(f"Scenario did not pass estimation. Restarting.")
+            #     delete_all_files(options, scenario_name)
+            #     continue
 
             logging.debug("Calling runner")
-            call_amiris(options, scenario_name)
+            execute_scenario(options, scenario_name)
 
             logging.debug("Calling evaluator")
-            positive_evaluation = evaluation(options, scenario_name)
+            positive_evaluation = evaluate_scenario(options, scenario_name)
             if positive_evaluation:
                 i += 1
                 logging.info(f"Created {i}/{n_to_generate} scenarios.")
             else:
-                shutil.rmtree(Path(options[CreateOptions.DIRECTORY], scenario_name, Path(NAME_SCENARIO_YAML).stem))
+                delete_all_files(options, scenario_name)
                 logging.warning(f"Scenario did not pass evaluation. Restarting.")
 
         log_and_print(f"Created {i}/{n_to_generate} scenarios.")
