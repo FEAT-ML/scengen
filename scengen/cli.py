@@ -19,6 +19,7 @@ SCENGEN_COMMAND_HELP = "Choose one of the following commands:"
 CREATE_HELP = "Creates scenarios for AMIRIS"
 CREATE_N_DEFAULT = 10
 CREATE_N_HELP = f"Specify number of scenarios to be generated (default: {CREATE_N_DEFAULT})"
+CREATE_CONFIG_HELP = "Path to configuration YAML file defining specifications for creation of scenarios"
 CREATE_JAR_HELP = "Path to 'amiris-core_<version>-jar-with-dependencies.jar'"
 CREATE_DIR_HELP = "Directory to parse scenarios from and write results to"
 
@@ -40,6 +41,7 @@ class CreateOptions(Enum):
     """Options for command `create`"""
 
     NUMBER = auto()
+    CONFIG = auto()
     JAR = auto()
     DIRECTORY = auto()
 
@@ -64,6 +66,7 @@ def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
 
     create_parser = subparsers.add_parser("create", help=CREATE_HELP)
     create_parser.add_argument("--number", "-n", type=int, default=CREATE_N_DEFAULT, help=CREATE_N_HELP)
+    create_parser.add_argument("--config", "-c", type=Path, required=True, help=CREATE_CONFIG_HELP)
     create_parser.add_argument("--jar", "-j", type=Path, required=True, help=CREATE_JAR_HELP)
     create_parser.add_argument("--directory", "-d", type=Path, default=Path("./"), help=CREATE_DIR_HELP)
 
