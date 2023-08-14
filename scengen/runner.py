@@ -15,7 +15,7 @@ from scengen.cli import CreateOptions, GeneralOptions
 NAME_SCENARIO_YAML = "scenario.yaml"
 
 
-def call_amiris(options: dict, scenario_name: str) -> None:
+def execute_scenario(options: dict, scenario_name: str) -> None:
     """Calls AMIRIS after mapping `options` and `scenario_name` using amirispy functionality"""
     options = map_options(options, scenario_name)
     amiris.run_amiris(options)

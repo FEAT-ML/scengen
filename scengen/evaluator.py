@@ -15,7 +15,7 @@ SCARCITY_PRICE = 3000
 THRESHOLD_SHARE_SCARCITY_HOURS = 0.10
 
 
-def evaluation(options: dict, scenario_name: str) -> bool:
+def evaluate_scenario(options: dict, scenario_name: str) -> bool:
     """
     Evaluates results of `scenario_name` by checking of occurrences of SCARCITY_PRICE is within
     THRESHOLD_SHARE_SCARCITY_HOURS
