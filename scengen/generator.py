@@ -15,16 +15,19 @@ from scengen.logs import log_and_raise_critical
 
 
 ERR_INVALID_INPUT_N_AGENTS_TO_CREATE = (
-    "Number of agents to create: Please specify either a fixed int value or a "
+    "Number of agents to create: Please specify either a positive int value or a "
     "List of [minimum, maximum]. Received `{}` instead."
 )
 
 
 def validate_input_range(input_range: Union[List[int], int]) -> NoReturn:
-    """Raises Exception if input range is not int or list of [minimum, maximum]"""
+    """Raises Exception if input range is not positive int or list of [minimum, maximum]"""
     if isinstance(input_range, int):
-        pass
+        if input_range < 1:
+            log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
     elif isinstance(input_range, list) and len(input_range) == 2 and all(isinstance(i, int) for i in input_range):
+        if any(i < 1 for i in input_range):
+            log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
         if input_range[0] >= input_range[1]:
             log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
     else:
