@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
+
 import logging
 import os
 from pathlib import Path
@@ -13,8 +14,10 @@ from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
 
 
-ERR_INVALID_INPUT_N_AGENTS_TO_CREATE = "Number of agents to create: Please specify either a fixed int value or a " \
-                                       "List of [minimum, maximum]. Received `{}` instead."
+ERR_INVALID_INPUT_N_AGENTS_TO_CREATE = (
+    "Number of agents to create: Please specify either a fixed int value or a "
+    "List of [minimum, maximum]. Received `{}` instead."
+)
 
 
 def validate_input_range(input_range: Union[List[int], int]) -> NoReturn:
@@ -71,9 +74,14 @@ def generate_scenario(options: dict) -> None:
     base_template = load_yaml(config["base_template"])
 
     for agent in config["create"]:
-        type_template = load_yaml(agent["type_template"])
+        type_template = load_yaml(
+            agent["type_template"]
+        )  # change to "safeload" so that aliases are tolerated (e.g. contract anchors)
         n_to_create = n_agents_to_create(agent["count"], random_seed)
         ids = agent["ids"]
 
+        for n in range(n_to_create):
+            # create agent
+            # append to base_template
+            pass
     os.chdir(cwd)
-    pass

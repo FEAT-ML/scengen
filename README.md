@@ -63,7 +63,7 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "EnergyExchange.yaml"  # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
-    count: [1, 1]  # min / max
+    count: 1  # min / max or just an int
     ids: 
       exchange: "energyExchangeDE"  # temporary name of this agent for auto-connecting to other agents
       
