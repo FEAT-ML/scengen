@@ -62,29 +62,54 @@ defaults:  # defaults used for scenario generation
 base_template: "./template.yaml"  # link to template file containing at least Schema & GeneralProperties
 
 create:  # list of agents to create
-  - type_template: "EnergyExchange.yaml"  # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
-    count: [1, 1]  # min / max
-    ids: 
-      exchange: "energyExchangeDE"  # temporary name of this agent for auto-connecting to other agents
-      
-  - type_template: "EnergyExchange.yaml"  # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
-    count: [1, 1]  # min / max
-    ids: 
-      exchange: "energyExchangeFR"  # temporary name of this agent for auto-connecting to other agents    
-    
-  - type_template: "DemandTrader.yaml"
-    count: [1, 2]
-    ids: ["demandTrader"]
-    external_ids:  # link to other dynamically create agents by name
-      exchange: "energyExchangeDE"  # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
-      forecast: 6  # fixed id used in base_template
+  - type_template: "agent_templates/DemandTrader.yaml"
+    count: [1, 3]
+    this_agent: "demandTraderDE" # link to other dynamically created agents by name
+    external_ids: 
+      exchange: "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
+      forecast: 6 # fixed id used in base_template
 
-  - type_template: "DemandTrader.yaml"
-    count: [1, 2]
-    ids: ["demandTrader"]
-    external_ids:  # link to other dynamically create agents by name
-      exchange: "energyExchangeFR"  # dynamically linked to newly created agent referenced herein as "energyExchangeFR"
-      forecast: 6  # fixed id used in base_template
+  - type_template: "agent_templates/EnergyExchange.yaml" # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
+    count: 1  # min / max
+    this_agent: "energyExchangeDE" # temporary name of this agent for auto-connecting to other agents
+```
+
+##### `type_template` YAML
+This file consists of two parts.
+
+First, it describes the Attributes of an Agent which shall be dynamically created in `Agents`.
+The Agent ID is created by `scengen` directly. 
+
+Optionally, linked `Contracts` are defined in the other section of the file.
+With the reserved key `//THISAGENT`, you link to this particular Agent to be created, whereas all other tags with 
+prefix `//` link to the particular agent in the `configuration` YAML under section `external_ids`.
+
+```yaml
+Agents:
+  Type: DemandTrader
+  Attributes:
+    Loads:
+      - ValueOfLostLoad: 10000.0
+        DemandSeries: "00_StdConfig/data/export/DE_DemandPositiveOnly_In_MWh.csv"
+        
+Contracts:
+  - SenderId: //exchange  # external agent
+    ReceiverId: //THISAGENT  # is referring to this particular agent
+    ProductName: GateClosureInfo
+    FirstDeliveryTime: -10
+    DeliveryIntervalInSteps: 3600
+
+  - SenderId: //THISAGENT
+    ReceiverId: //exchange
+    ProductName: Bids
+    FirstDeliveryTime: 0
+    DeliveryIntervalInSteps: 3600
+
+  - SenderId: //exchange
+    ReceiverId: //THISAGENT
+    ProductName: Awards
+    FirstDeliveryTime: 4
+    DeliveryIntervalInSteps: 3600
 ```
 
 ##### `trace_file` YAML
