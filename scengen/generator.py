@@ -6,7 +6,7 @@ import logging
 import os
 from pathlib import Path
 import random
-from typing import Union, List, NoReturn
+from typing import Union, List, NoReturn, Dict
 
 from fameio.source.loader import load_yaml
 
@@ -20,6 +20,7 @@ ERR_INVALID_INPUT_N_AGENTS_TO_CREATE = (
     "Number of agents to create: Please specify either a positive int value or a "
     "List of [minimum, maximum]. Received `{}` instead."
 )
+ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
 
 
 def validate_input_range(input_range: Union[List[int], int]) -> NoReturn:
@@ -67,20 +68,68 @@ def n_agents_to_create(input_range: Union[List[int], int], random_seed: int) -> 
 
 def replace_ids(contracts: List[dict], agent_id: str, ext_id: Union[dict, None]) -> None:
     """Replaces in-place `agent_id` and optional `ext_id` in given `contracts`"""
-    replace_map = {KEY_THISAGENT: agent_id, **ext_id}
+    replace_map = {KEY_THISAGENT: agent_id}
     if ext_id:
-        replace_map.update(ext_id)
+        for key, value in ext_id.items():
+            if isinstance(value, int):
+                replace_map[key] = value
+            elif not value.startswith(REPLACEMENT_IDENTIFIER):
+                replace_map[key] = REPLACEMENT_IDENTIFIER + value
+            else:
+                replace_map[key] = value
 
     for k, v in replace_map.items():
         replace_in_dict(contracts, k, v)
 
 
-def replace_in_dict(contracts: List[dict], replace_key: str, replace_value: str) -> None:
-    """Recursively searches for `replace_key` in contracts and `replace_value` with leading `REPLACEMENT_IDENTIFIER`"""
+def replace_in_dict(contracts: List[dict], replace_identifier: str, replace_value: str) -> None:
+    """Recursively searches for `replace_identifier` in contracts and replaces `replace_value` if not integer"""
     for contract in contracts:
         for key, value in contract.items():
-            if isinstance(value, str) and replace_key in value:
-                contract[key] = REPLACEMENT_IDENTIFIER + replace_value
+            if isinstance(value, str) and replace_identifier in value:
+                contract[key] = replace_value
+
+
+def get_all_ids_from(scenario: dict) -> List[int]:
+    """Returns list of unique Agent Ids in given `scenario`"""
+    unique_ids = []
+    for agent in scenario["Agents"]:
+        append_unique_integer_id(agent["Id"], unique_ids)
+    return unique_ids
+
+
+def append_unique_integer_id(agent_id: Union[str, int], unique_ids: List[int]):
+    """Appends `agent_id` to `unique_ids` if integer and unique"""
+    if isinstance(agent_id, int) and agent_id not in unique_ids:
+        unique_ids.append(agent_id)
+
+
+def create_new_unique_id(unique_ids: List[int]) -> int:
+    """Returns new unique integer by adding 1 to the highest Id in `unique_ids`. Adds new Id in-place to `unique_ids`"""
+    new_id = max(unique_ids) + 1 if unique_ids else 1
+    unique_ids.append(new_id)
+    return new_id
+
+
+def resolve_ids(scenario: dict) -> None:
+    """Resolves in-place all placeholder ID references in Agents & Contracts to unique Ids"""
+    active_ids = get_all_ids_from(scenario)
+    replacement_map: Dict[str, int] = {}
+    for agent in scenario["Agents"]:
+        agent_id = agent["Id"]
+        if REPLACEMENT_IDENTIFIER in str(agent_id):
+            if agent_id in replacement_map.keys():
+                agent["Id"] = replacement_map[agent_id]
+            else:
+                unique_id = create_new_unique_id(active_ids)
+                agent["Id"] = replacement_map[agent_id] = unique_id
+    for contract in scenario["Contracts"]:
+        for key, value in contract.items():
+            if REPLACEMENT_IDENTIFIER in str(value):
+                try:
+                    contract[key] = replacement_map[value]
+                except KeyError:
+                    log_and_raise_critical(ERR_FAILED_RESOLVE_ID.format(value, contract))
 
 
 def generate_scenario(options: dict) -> None:
@@ -105,14 +154,18 @@ def generate_scenario(options: dict) -> None:
         external_ids = agent.get("external_ids")
 
         for n in range(n_to_create):
-            agent_id = agent_name + str(n)
-            # modify agent
-            agent_type_template["Id"] = agent_id
-            base_template["Agents"].append(agent_type_template)
+            agent_to_append = agent_type_template.copy()
+
+            agent_id = REPLACEMENT_IDENTIFIER + agent_name
+            agent_id += str(n) if n_to_create > 1 else ""
+
+            agent_to_append["Id"] = agent_id
+            base_template["Agents"].append(agent_to_append)
 
             if contract_type_template:
                 replace_ids(contract_type_template, agent_id, external_ids)
                 base_template["Contracts"].extend(contract_type_template)
 
-    # resolve links in contracts
+    resolve_ids(base_template)
     os.chdir(cwd)
+    # return base_template to forward to estimator
