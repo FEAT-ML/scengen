@@ -12,7 +12,7 @@ from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
-
+from scengen.misc import load_yaml_raw
 
 ERR_INVALID_INPUT_N_AGENTS_TO_CREATE = (
     "Number of agents to create: Please specify either a positive int value or a "
@@ -77,9 +77,7 @@ def generate_scenario(options: dict) -> None:
     base_template = load_yaml(config["base_template"])
 
     for agent in config["create"]:
-        type_template = load_yaml(
-            agent["type_template"]
-        )  # change to "safeload" so that aliases are tolerated (e.g. contract anchors)
+        type_template = load_yaml_raw(Path(agent["type_template"]))
         n_to_create = n_agents_to_create(agent["count"], random_seed)
         ids = agent["ids"]
 
