@@ -5,12 +5,9 @@ import logging
 import os
 import shutil
 from pathlib import Path
-from typing import Union
 
 import yaml
-import ruamel.yaml
 from fameio.source.loader import load_yaml
-from ruamel.yaml import CommentedMap
 
 from scengen.cli import CreateOptions
 from scengen.runner import NAME_SCENARIO_YAML
@@ -35,9 +32,3 @@ def increase_count_in_trace_file(options: dict) -> None:
         yaml.dump(trace_file, file, default_flow_style=False)
     os.chdir(cwd)
     logging.debug(f"Increased trace file count to '{trace_file['total_count']}'")
-
-
-def load_yaml_raw(file_path: Union[str, Path]) -> CommentedMap:
-    """Returns YAML file from `file_path` loaded by ruamel.yaml preserving file formatting and aliases"""
-    ryaml = ruamel.yaml.YAML()
-    return ryaml.load(Path(file_path))
