@@ -112,7 +112,7 @@ def generate_scenario(options: dict) -> None:
 
             if contract_type_template:
                 replace_ids(contract_type_template, agent_id, external_ids)
-                base_template["Contracts"].append(contract_type_template)
+                base_template["Contracts"].extend(contract_type_template)
 
     # resolve links in contracts
     os.chdir(cwd)
