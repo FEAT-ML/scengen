@@ -169,4 +169,6 @@ def generate_scenario(options: dict) -> None:
 
     resolve_ids(base_template)
     os.chdir(cwd)
+    # check where to save to
     write_yaml(base_template, Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml"))
+

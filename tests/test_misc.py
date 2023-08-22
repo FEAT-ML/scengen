@@ -10,7 +10,7 @@ class Test:
     def test_check_if_valid_yaml_path__valid(self, path):
         check_if_valid_yaml_path(Path(path))
 
-    @pytest.mark.parametrize("path", ["path/to/file", "file.csv", "./file.yaaaMl", "yaml.txt"])
+    @pytest.mark.parametrize("path", ["path/to/file", "file.csv", "./file.yaaaMl", "yaml.txt", "", ".", None])
     def test_check_if_valid_yaml_path__invalid(self, path):
         with pytest.raises(Exception):
             check_if_valid_yaml_path(Path(path))
