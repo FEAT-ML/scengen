@@ -25,7 +25,7 @@ def execute_scenario(options: dict) -> None:
 def map_options(options: dict) -> dict:
     """Maps values from scengen `options` to option keys of amirispy"""
     options[amiris.RunOptions.JAR] = options[CreateOptions.JAR]
-    options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"])
+    options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY])
     options[AMIRISGeneralOptions.LOG] = options[GeneralOptions.LOG]
     options[AMIRISGeneralOptions.LOGFILE] = options[GeneralOptions.LOGFILE]
     options[amiris.RunOptions.SCENARIO] = options["scenario_path"]
