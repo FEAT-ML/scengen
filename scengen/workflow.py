@@ -33,7 +33,7 @@ def scengen() -> None:
                 # positive_estimation = estimate_scenario()
                 # if not positive_estimation:
                 #     logging.warning(f"Scenario did not pass estimation. Restarting.")
-                #     delete_all_files(options, scenario_name)
+                #     delete_all_files(options)
                 #     continue
 
             logging.debug("Calling runner")
