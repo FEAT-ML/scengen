@@ -28,18 +28,23 @@ def scengen() -> None:
             logging.debug("Calling generator")
             generate_scenario(options)
 
-            # logging.debug("Calling estimator")
-            # positive_estimation = estimate_scenario()
-            # if not positive_estimation:
-            #     logging.warning(f"Scenario did not pass estimation. Restarting.")
-            #     delete_all_files(options, scenario_name)
-            #     continue
+            if not options[CreateOptions.SKIP_ESTIMATION]:
+                logging.debug("Calling estimator")
+                # positive_estimation = estimate_scenario()
+                # if not positive_estimation:
+                #     logging.warning(f"Scenario did not pass estimation. Restarting.")
+                #     delete_all_files(options, scenario_name)
+                #     continue
 
             logging.debug("Calling runner")
             execute_scenario(options)
 
-            logging.debug("Calling evaluator")
-            positive_evaluation = evaluate_scenario(options)
+            if not options[CreateOptions.SKIP_EVALUATION]:
+                logging.debug("Calling evaluator")
+                positive_evaluation = evaluate_scenario(options)
+            else:
+                positive_evaluation = True
+
             if positive_evaluation:
                 i += 1
                 increase_count_in_trace_file(options)
