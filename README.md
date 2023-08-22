@@ -63,7 +63,7 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
-    count: [1, 3]
+    count: 1 range(1, 3) [1, 3]
     this_agent: "demandTraderDE" # link to other dynamically created agents by name
     external_ids: 
       exchange: "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
@@ -89,7 +89,7 @@ Agents:
   Type: DemandTrader
   Attributes:
     Loads:
-      - ValueOfLostLoad: 10000.0
+      - ValueOfLostLoad: 10000.0  [100, 10000], range(100, 10000)
         DemandSeries: "00_StdConfig/data/export/DE_DemandPositiveOnly_In_MWh.csv"
         
 Contracts:
