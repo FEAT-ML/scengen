@@ -12,6 +12,7 @@ from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
+from scengen.misc import write_yaml
 
 REPLACEMENT_IDENTIFIER = "//"
 KEY_THISAGENT = f"{REPLACEMENT_IDENTIFIER}THISAGENT"
@@ -168,4 +169,6 @@ def generate_scenario(options: dict) -> None:
 
     resolve_ids(base_template)
     os.chdir(cwd)
-    # return base_template to forward to estimator
+    # check where to save to
+    write_yaml(base_template, Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml"))
+
