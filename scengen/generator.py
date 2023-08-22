@@ -176,11 +176,17 @@ def generate_scenario(options: dict) -> None:
 
 
 def set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:
-    """Sets random seed by optional user setting in `options["random_seed"]` or current system time in ns as seed"""
+    """Sets random seed if not yet saved to `options['random_seed']`"""
     if not options.get("random_seed"):
-        if defaults.get("seed"):
-            random_seed = defaults["seed"]
-        else:
-            random_seed = time.time_ns()
+        random_seed = get_random_seed(defaults)
         random.seed(random_seed)
         options["random_seed"] = trace_file["random_seed"] = random_seed
+
+
+def get_random_seed(defaults: dict) -> int:
+    """Returns random seed as integer, defined optionally in `defaults['seed']` or from system time in ns instead"""
+    if defaults.get("seed"):
+        random_seed = defaults["seed"]
+    else:
+        random_seed = time.time_ns()
+    return random_seed

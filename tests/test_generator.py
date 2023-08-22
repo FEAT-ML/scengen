@@ -1,3 +1,4 @@
+import time
 from typing import List, Union
 
 import pytest
@@ -8,6 +9,7 @@ from scengen.generator import (
     create_new_unique_id,
     replace_in_dict,
     get_all_ids_from,
+    get_random_seed,
 )
 
 
@@ -79,3 +81,18 @@ class Test:
     )
     def test_get_all_ids_from(self, scenario: dict, expected: list[int]):
         assert get_all_ids_from(scenario) == expected
+
+    @pytest.mark.parametrize("defaults, expected", [({"seed": 42}, 42)])
+    def test_get_random_seed__override_default(self, defaults, expected):
+        seed = get_random_seed(defaults)
+        assert seed == expected
+
+    @pytest.mark.parametrize(
+        "defaults",
+        [
+            {"no_seed_here": "certainly_no_seed"},
+        ],
+    )
+    def test_get_random_seed__default(self, defaults):
+        seed = get_random_seed(defaults)
+        assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
