@@ -22,10 +22,14 @@ CREATE_N_HELP = f"Specify number of scenarios to be generated (default: {CREATE_
 CREATE_CONFIG_HELP = "Path to configuration YAML file defining specifications for creation of scenarios"
 CREATE_JAR_HELP = "Path to 'amiris-core_<version>-jar-with-dependencies.jar'"
 CREATE_DIR_HELP = "Directory to parse scenarios from and write results to"
-CREATE_SKIP_ESTIMATION_HELP = "Speed-focused approach by omitting the AMIRIS scenario estimation at the expense " \
-                              "of bypassing plausibility check (Default: False)"
-CREATE_SKIP_EVALUATION_HELP = "Speed-focused approach by omitting the AMIRIS result evaluation at the expense " \
-                              "of bypassing plausibility check (Default: False)"
+CREATE_SKIP_ESTIMATION_HELP = (
+    "Speed-focused approach by omitting the AMIRIS scenario estimation at the expense "
+    "of bypassing plausibility check (Default: False)"
+)
+CREATE_SKIP_EVALUATION_HELP = (
+    "Speed-focused approach by omitting the AMIRIS result evaluation at the expense "
+    "of bypassing plausibility check (Default: False)"
+)
 
 
 class GeneralOptions(Enum):
