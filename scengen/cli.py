@@ -22,6 +22,14 @@ CREATE_N_HELP = f"Specify number of scenarios to be generated (default: {CREATE_
 CREATE_CONFIG_HELP = "Path to configuration YAML file defining specifications for creation of scenarios"
 CREATE_JAR_HELP = "Path to 'amiris-core_<version>-jar-with-dependencies.jar'"
 CREATE_DIR_HELP = "Directory to parse scenarios from and write results to"
+CREATE_SKIP_ESTIMATION_HELP = (
+    "Speed-focused approach by omitting the AMIRIS scenario estimation at the expense "
+    "of bypassing plausibility check (Default: False)"
+)
+CREATE_SKIP_EVALUATION_HELP = (
+    "Speed-focused approach by omitting the AMIRIS result evaluation at the expense "
+    "of bypassing plausibility check (Default: False)"
+)
 
 
 class GeneralOptions(Enum):
@@ -44,6 +52,8 @@ class CreateOptions(Enum):
     CONFIG = auto()
     JAR = auto()
     DIRECTORY = auto()
+    SKIP_ESTIMATION = auto()
+    SKIP_EVALUATION = auto()
 
 
 Options = {
@@ -69,6 +79,12 @@ def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
     create_parser.add_argument("--config", "-c", type=Path, required=True, help=CREATE_CONFIG_HELP)
     create_parser.add_argument("--jar", "-j", type=Path, required=True, help=CREATE_JAR_HELP)
     create_parser.add_argument("--directory", "-d", type=Path, default=Path("./"), help=CREATE_DIR_HELP)
+    create_parser.add_argument(
+        "--skip_estimation", "-ses", default=False, action="store_true", help=CREATE_SKIP_ESTIMATION_HELP
+    )
+    create_parser.add_argument(
+        "--skip_evaluation", "-sev", default=False, action="store_true", help=CREATE_SKIP_EVALUATION_HELP
+    )
 
     args = vars(parent_parser.parse_args())
     command = Command[args.pop("command").upper()]

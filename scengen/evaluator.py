@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+import logging
 from pathlib import Path
 
 import pandas as pd
+from amirispy.source.cli import RunOptions
 
-from scengen.cli import CreateOptions
-from scengen.runner import NAME_SCENARIO_YAML
 
 NAME_ENERGY_EXCHANGE = "EnergyExchange"
 NAME_ELECTRICITY_PRICE_COLUMN = "ElectricityPriceInEURperMWH"  # noqa
@@ -16,26 +16,24 @@ THRESHOLD_SHARE_SCARCITY_HOURS = 0.10
 
 
 def evaluate_scenario(options: dict) -> bool:
-    """
-    Evaluates results of scenario by checking of occurrences of SCARCITY_PRICE is within THRESHOLD_SHARE_SCARCITY_HOURS
+    """Returns True if results pass all individual checks"""
+    checks = []
+    checks.append(scarcity_occurrence(options))
 
-    Args:
-        options: options dictionary
+    return all(checks)
 
-    Returns:
-        True if occurrences of SCARCITY_PRICE is within THRESHOLD_SHARE_SCARCITY_HOURS, otherwise False
-    """
-    energy_exchange = pd.read_csv(
-        Path(
-            options[CreateOptions.DIRECTORY],
-            options["scenario_name"],
-            Path(NAME_SCENARIO_YAML).stem,
-            f"{NAME_ENERGY_EXCHANGE}.csv",
-        ),
-        sep=";",
-    )
 
+def scarcity_occurrence(options: dict) -> bool:
+    """Returns True if occurrences of SCARCITY_PRICE is within THRESHOLD_SHARE_SCARCITY_HOURS"""
+    path_to_exchange = Path(options[RunOptions.OUTPUT], options["scenario_name"], f"{NAME_ENERGY_EXCHANGE}.csv")
+    energy_exchange = pd.read_csv(path_to_exchange, sep=";")
     scarcity_hours = (energy_exchange[NAME_ELECTRICITY_PRICE_COLUMN] >= SCARCITY_PRICE).sum()
-    within_threshold = scarcity_hours / len(energy_exchange) < THRESHOLD_SHARE_SCARCITY_HOURS
-
-    return within_threshold
+    n_of_tolerated_hours = round(len(energy_exchange) * THRESHOLD_SHARE_SCARCITY_HOURS)
+    if scarcity_hours > n_of_tolerated_hours:
+        decision = False
+        logging.warning(
+            f"Number of scarcity hours ({scarcity_hours}) exceeds toleration of {n_of_tolerated_hours} hours."
+        )
+    else:
+        decision = True
+    return decision

@@ -8,6 +8,7 @@ import logging
 
 from logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
+from scengen.estimator import estimate_scenario
 from scengen.generator import generate_scenario
 from scengen.misc import delete_all_files, increase_count_in_trace_file
 from scengen.runner import execute_scenario
@@ -28,18 +29,23 @@ def scengen() -> None:
             logging.debug("Calling generator")
             generate_scenario(options)
 
-            # logging.debug("Calling estimator")
-            # positive_estimation = estimate_scenario()
-            # if not positive_estimation:
-            #     logging.warning(f"Scenario did not pass estimation. Restarting.")
-            #     delete_all_files(options, scenario_name)
-            #     continue
+            if not options[CreateOptions.SKIP_ESTIMATION]:
+                logging.debug("Calling estimator")
+                positive_estimation = estimate_scenario(options)
+                if not positive_estimation:
+                    logging.warning(f"Scenario did not pass estimation. Restarting.")
+                    delete_all_files(options)
+                    continue
 
             logging.debug("Calling runner")
             execute_scenario(options)
 
-            logging.debug("Calling evaluator")
-            positive_evaluation = evaluate_scenario(options)
+            if not options[CreateOptions.SKIP_EVALUATION]:
+                logging.debug("Calling evaluator")
+                positive_evaluation = evaluate_scenario(options)
+            else:
+                positive_evaluation = True
+
             if positive_evaluation:
                 i += 1
                 increase_count_in_trace_file(options)

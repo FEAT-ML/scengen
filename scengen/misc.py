@@ -16,8 +16,9 @@ from scengen.runner import NAME_SCENARIO_YAML
 
 def delete_all_files(options: dict):
     """Removes all created files of scenario stored in `CreateOptions.DIRECTORY`"""
-    dir_to_remove = Path(options[CreateOptions.DIRECTORY], options["scenario_name"], Path(NAME_SCENARIO_YAML).stem)
-    shutil.rmtree(dir_to_remove)
+    dir_to_remove = Path(options[CreateOptions.DIRECTORY], options["scenario_name"])
+    shutil.rmtree(dir_to_remove, ignore_errors=True)
+    os.remove(options["scenario_path"])
     logging.debug(f"Removed all files in '{dir_to_remove}'")
 
 
