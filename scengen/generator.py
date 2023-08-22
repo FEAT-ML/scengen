@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-
+import copy
 import logging
 import os
 from pathlib import Path
@@ -157,7 +157,7 @@ def generate_scenario(options: dict) -> None:
         external_ids = agent.get("external_ids")
 
         for n in range(n_to_create):
-            agent_to_append = agent_type_template.copy()
+            agent_to_append = copy.deepcopy(agent_type_template)
 
             agent_id = REPLACEMENT_IDENTIFIER + agent_name
             agent_id += str(n) if n_to_create > 1 else ""
@@ -166,13 +166,14 @@ def generate_scenario(options: dict) -> None:
             base_template["Agents"].append(agent_to_append)
 
             if contract_type_template:
-                replace_ids(contract_type_template, agent_id, external_ids)
-                base_template["Contracts"].extend(contract_type_template)
+                contract_to_append = copy.deepcopy(contract_type_template)
+                replace_ids(contract_to_append, agent_id, external_ids)
+                base_template["Contracts"].extend(contract_to_append)
 
     resolve_ids(base_template)
     os.chdir(cwd)
-    # check where to save to
-    write_yaml(base_template, Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml"))
+    options["scenario_path"] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml")
+    write_yaml(base_template, options["scenario_path"])
 
 
 def set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:

@@ -28,9 +28,7 @@ def map_options(options: dict) -> dict:
     options[amiris.RunOptions.OUTPUT] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"])
     options[AMIRISGeneralOptions.LOG] = options[GeneralOptions.LOG]
     options[AMIRISGeneralOptions.LOGFILE] = options[GeneralOptions.LOGFILE]
-    options[amiris.RunOptions.SCENARIO] = Path(
-        options[CreateOptions.DIRECTORY], options["scenario_name"], NAME_SCENARIO_YAML
-    )
+    options[amiris.RunOptions.SCENARIO] = options["scenario_path"]
     return options
 
 
