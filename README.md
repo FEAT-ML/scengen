@@ -56,7 +56,7 @@ It has the following format with all paths relative to this particular file.
 
 ```yaml
 defaults:  # defaults used for scenario generation
-  seed: 42  # seed used for random number generation
+  # seed: 42 # optional seed used for random number generation otherwise current system time in ns is used
   trace_file: "./tracefile.yaml"  # file used to log created scenarios avoiding duplicates
   base_name: "Germany2019"  # first part of name created by generator; second part of name is unique identifier (number of all scenarios)
 
