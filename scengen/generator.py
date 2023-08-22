@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import random
 from typing import Union, List, NoReturn, Dict
+import time
 
 from fameio.source.loader import load_yaml
 
@@ -38,7 +39,7 @@ def validate_input_range(input_range: Union[List[int], int]) -> NoReturn:
         log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
 
 
-def n_agents_to_create(input_range: Union[List[int], int], random_seed: int) -> int:
+def n_agents_to_create(input_range: Union[List[int], int]) -> int:
     """
     Defines number of agents to create based on `input_range`.
     If `input_range` is an int -> this int is returned
@@ -47,7 +48,6 @@ def n_agents_to_create(input_range: Union[List[int], int], random_seed: int) -> 
 
     Args:
         input_range: either an int or a list of [minimum, maximum]
-        random_seed: random seed for drawing random numbers
 
     Returns:
         Number of agents to create
@@ -61,7 +61,6 @@ def n_agents_to_create(input_range: Union[List[int], int], random_seed: int) -> 
         n_to_create = input_range
     else:
         minimum, maximum = input_range
-        random.seed(random_seed)
         n_to_create = random.randint(minimum, maximum)
 
     return n_to_create
@@ -139,9 +138,12 @@ def generate_scenario(options: dict) -> None:
     cwd = os.getcwd()
     os.chdir(Path(options[CreateOptions.CONFIG]).parent)
     defaults = config["defaults"]
-    random_seed = defaults["seed"]
+
     trace_file = load_yaml(defaults["trace_file"])
     count = trace_file["total_count"]
+
+    set_random_seed(defaults, options, trace_file)
+
     options["scenario_name"] = defaults["base_name"] + f"_{count}"
 
     base_template = load_yaml(config["base_template"])
@@ -150,7 +152,7 @@ def generate_scenario(options: dict) -> None:
         type_template = load_yaml(Path(agent["type_template"]))
         agent_type_template = type_template["Agents"]
         contract_type_template = type_template.get("Contracts")
-        n_to_create = n_agents_to_create(agent["count"], random_seed)
+        n_to_create = n_agents_to_create(agent["count"])
         agent_name = agent["this_agent"]
         external_ids = agent.get("external_ids")
 
@@ -172,3 +174,19 @@ def generate_scenario(options: dict) -> None:
     # check where to save to
     write_yaml(base_template, Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml"))
 
+
+def set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:
+    """Sets random seed if not yet saved to `options['random_seed']`"""
+    if not options.get("random_seed"):
+        random_seed = get_random_seed(defaults)
+        random.seed(random_seed)
+        options["random_seed"] = trace_file["random_seed"] = random_seed
+
+
+def get_random_seed(defaults: dict) -> int:
+    """Returns random seed as integer, defined optionally in `defaults['seed']` or from system time in ns instead"""
+    if defaults.get("seed"):
+        random_seed = defaults["seed"]
+    else:
+        random_seed = time.time_ns()
+    return random_seed

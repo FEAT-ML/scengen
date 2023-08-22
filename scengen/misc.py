@@ -38,7 +38,7 @@ def increase_count_in_trace_file(options: dict) -> None:
 def write_yaml(output_file: dict, output_file_path: Path) -> None:
     """Writes given `output_file` to `output_file_path` (ending in .yaml)"""
     check_if_valid_yaml_path(output_file_path)
-    with open(output_file_path, 'w') as stream:
+    with open(output_file_path, "w") as stream:
         try:
             yaml.safe_dump(output_file, stream)
         except yaml.YAMLError:
@@ -47,5 +47,5 @@ def write_yaml(output_file: dict, output_file_path: Path) -> None:
 
 def check_if_valid_yaml_path(file_path):
     """Raises Exception if provided `file_path` is not a valid YAML path"""
-    if Path(file_path).suffix.lower() not in ['.yaml', '.yml']:
+    if Path(file_path).suffix.lower() not in [".yaml", ".yml"]:
         log_and_raise_critical(f"Provide a valid Path to a YAML file. Received '{file_path}'")
