@@ -4,6 +4,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 [![PyPI version](https://badge.fury.io/py/scengen.svg)](https://badge.fury.io/py/scengen)
 [![PyPI license](https://img.shields.io/pypi/l/scengen.svg)](https://badge.fury.io/py/scengen)
+[![PyTests](https://github.com/FEAT-ML/scenario-generator/actions/workflows/python-app.yml/badge.svg)](https://github.com/FEAT-ML/scenario-generator/actions/workflows/python-app.yml)
 
 # scengen
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
