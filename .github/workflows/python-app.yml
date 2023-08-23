@@ -42,5 +42,5 @@ jobs:
         coverage-badge -o coverage.svg
     - name: Add badge to README.md
       run: |
-        cp coverage.svg path_to_your_readme_folder
+        cp coverage.svg https://github.com/FEAT-ML/scenario-generator
         echo '![](https://github.com/FEAT-ML/scenario-generator/coverage.svg)' >> https://github.com/FEAT-ML/scenario-generator/README.md
