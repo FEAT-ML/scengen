@@ -40,7 +40,9 @@ jobs:
     - name: Generate coverage badge
       run: |
         coverage-badge -o coverage.svg
-    - name: Add badge to README.md
+    - name: Upload badge to repository
       run: |
-        cp coverage.svg https://github.com/FEAT-ML/scenario-generator
-        echo '![](https://github.com/FEAT-ML/scenario-generator/coverage.svg)' >> https://github.com/FEAT-ML/scenario-generator/README.md
+        mv coverage.svg docu/
+    - name: Update README.md with badge
+      run: |
+        echo '![](docu/coverage.svg)' >> README.md
