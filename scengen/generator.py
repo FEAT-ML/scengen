@@ -16,26 +16,33 @@ from scengen.logs import log_and_raise_critical
 from scengen.misc import write_yaml
 
 RANGE_IDENTIFIER = "range"
+CHOOSE_IDENTIFIER = "choose"
+PICKFILE_IDENTIFIER = "pickfile"
 
 REPLACEMENT_IDENTIFIER = "//"
 KEY_THISAGENT = f"{REPLACEMENT_IDENTIFIER}THISAGENT"
 
 ERR_INVALID_RANGE_INPUT = (
     "Received invalid range input in form '{}'. Please provide in format "
-    "'range(minimum_integer, maximum_integer)'. Both integers must be >= 0."
+    "'range(minimum_integer, maximum_integer)'. Negative integers are considered {}"
 )
+ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
 ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
 
 
-def validate_input_range(input_range: Tuple[int, int]) -> NoReturn:
-    """Raises Exception if input range is not positive int or list of [minimum, maximum]"""
+def validate_input_range(input_range: Tuple[int, int], allow_negative: bool) -> NoReturn:
+    """
+    Raises Exception if input range is no int or list of [minimum, maximum], and
+    values >= 0 (if `allow_negative` = False)
+    """
     if isinstance(input_range, tuple) and len(input_range) == 2 and all(isinstance(i, int) for i in input_range):
-        if any(i < 0 for i in input_range):
-            log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range))
+        if not allow_negative:
+            if any(i < 0 for i in input_range):
+                log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range, allow_negative))
         if input_range[0] >= input_range[1]:
-            log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range))
+            log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range, allow_negative))
     else:
-        log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range))
+        log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range, allow_negative))
 
 
 def digest_range(input_value: str) -> Tuple[int, int]:
@@ -44,7 +51,7 @@ def digest_range(input_value: str) -> Tuple[int, int]:
     try:
         min_value, max_value = map(int, numbers.split(","))
     except ValueError:
-        log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_value))
+        log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
     return min_value, max_value
 
 
@@ -54,14 +61,14 @@ def extract_numbers_from_string(input_value: str) -> str:
     return extracted_numbers
 
 
-def get_value_from_field(input_value: Union[List[Any], Any]) -> Any:
+def get_value_from_field(input_value: Union[List[Any], Any], allow_negative: bool = True) -> Any:
     """
     Returns value stored in `input_value` based on the user specification [fixed value, one out of List,
-    random in range]
+    random in range]. `allow_negative` is True as default but can limit allowed range to values >=0.
     """
     if RANGE_IDENTIFIER in input_value.lower():
         input_range = digest_range(input_value)
-        validate_input_range(input_range)
+        validate_input_range(input_range, allow_negative)
         minimum, maximum = input_range
         value = random.randint(minimum, maximum)
         logging.debug(f"Chose random value '{value}' from '{input_value}'.")
@@ -160,7 +167,7 @@ def generate_scenario(options: dict) -> None:
         type_template = load_yaml(Path(agent["type_template"]))
         agent_type_template = type_template["Agents"]
         contract_type_template = type_template.get("Contracts")
-        n_to_create = get_value_from_field(agent["count"])
+        n_to_create = get_value_from_field(agent["count"], allow_negative=False)
         agent_name = agent["this_agent"]
         external_ids = agent.get("external_ids")
 

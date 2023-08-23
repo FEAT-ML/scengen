@@ -18,14 +18,18 @@ from scengen.generator import (
 class Test:
     @pytest.mark.parametrize("values", [(10, 20), (1, 2), (1, 11111111111), (0, 3)])
     def test_validate_input_range__valid(self, values: Tuple[int, int]):
-        validate_input_range(values)
+        validate_input_range(values, allow_negative=False)
+
+    @pytest.mark.parametrize("values", [(-10, 0), (-2, 1), (-0, 11111111111)])
+    def test_validate_input_range__valid(self, values: Tuple[int, int]):
+        validate_input_range(values, allow_negative=True)
 
     @pytest.mark.parametrize(
-        "values", ["any string", [], "", 3.5, -1, 0, [-4, -1], [0, 10], [10, 20, 30], [10, 30], [10, "any string"]]
+        "values", ["any string", [], "", 3.5, -1, 0, [-4, -1], [0, 10], [10, 20, 30], [10, 30], [10, "any string"], (-3, 10)]
     )
     def test_validate_input_range__invalid_type(self, values):
         with pytest.raises(Exception):
-            validate_input_range(values)
+            validate_input_range(values, allow_negative=False)
 
     @pytest.mark.parametrize(
         "unique_list, new_id, expected",
@@ -99,7 +103,7 @@ class Test:
         seed = get_random_seed(defaults)
         assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
 
-    @pytest.mark.parametrize("values, expected", [("range(0, 4)", (0, 4)), ("RaNGE(10, 30)", (10, 30))])
+    @pytest.mark.parametrize("values, expected", [("range(0, 4)", (0, 4)), ("RaNGE(-10, 30)", (-10, 30))])
     def test_digest_range__valid_input(self, values, expected):
         assert digest_range(values) == expected
 
@@ -111,3 +115,4 @@ class Test:
     @pytest.mark.parametrize("values, expected", [("range(0, 4)", "0, 4"), ("RaNgE(1, 23", "1, 23")])
     def test_extract_numbers_from_string(self, values, expected):
         assert extract_numbers_from_string(values) == expected
+
