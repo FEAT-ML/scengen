@@ -109,7 +109,7 @@ def extract_numbers_from_string(input_value: str) -> str:
 
 
 def digest_choose(input_value: str) -> List[Union[int, float, str]]:
-    options = input_value.lower().replace(CHOOSE_IDENTIFIER, "").replace("(", "").replace(")", "").replace(" ", "")
+    options = input_value.lower().replace(CHOOSE_IDENTIFIER, "").replace("(", "").replace(")", "").replace(" ", "").replace('"', '').replace("'", "")
     options = options.split(SPLIT_IDENTIFIER)
     options = cast_numeric_strings(options)
     return options
