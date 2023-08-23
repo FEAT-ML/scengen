@@ -11,7 +11,7 @@ from scengen.generator import (
     get_all_ids_from,
     get_random_seed,
     digest_range,
-    extract_numbers_from_string,
+    extract_numbers_from_string, get_agent_id,
 )
 
 
@@ -116,3 +116,9 @@ class Test:
     def test_extract_numbers_from_string(self, values, expected):
         assert extract_numbers_from_string(values) == expected
 
+    @pytest.mark.parametrize("name, agent_n, total_n, expected", [("MyAgent", 2, 3, "//MyAgent2"),
+                                                                  ("MyAgent", 3, 3, "//MyAgent3"),
+                                                                  ("MyAgent", 1, 1, "//MyAgent"),
+                                                                  ])
+    def test_get_agent_id(self, name, agent_n, total_n, expected):
+        assert get_agent_id(name, agent_n, total_n) == expected

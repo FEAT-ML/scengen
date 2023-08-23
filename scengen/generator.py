@@ -63,8 +63,9 @@ def extract_numbers_from_string(input_value: str) -> str:
 
 def get_value_from_field(input_value: Union[List[Any], Any], allow_negative: bool = True) -> Any:
     """
-    Returns value stored in `input_value` based on the user specification [fixed value, one out of List,
-    random in range]. `allow_negative` is True as default but can limit allowed range to values >=0.
+    Returns value stored in `input_value` based on the user specification 'RANGE_IDENTIFIER', 'CHOOSE_IDENTIFIER',
+    'PICKFILE_IDENTIFIER' or else just `input_value`.
+    In option `RANGE_IDENTIFIER`, `allow_negative` is True as default but can limit allowed range to values >=0.
     """
     if RANGE_IDENTIFIER in input_value.lower():
         input_range = digest_range(input_value)
@@ -72,9 +73,14 @@ def get_value_from_field(input_value: Union[List[Any], Any], allow_negative: boo
         minimum, maximum = input_range
         value = random.randint(minimum, maximum)
         logging.debug(f"Chose random value '{value}' from '{input_value}'.")
-    elif isinstance(input_value, list):
+    elif CHOOSE_IDENTIFIER in input_value.lower():
+        options_to_choose = digest_choose(input_value)
         value = random.choice(input_value)
         logging.debug(f"Chose random value '{value}' from list '{input_value}'.")
+    elif PICKFILE_IDENTIFIER in input_value.lower():
+        options_to_pick = digest_pickfile(input_value)
+        value = random.choice(options_to_pick)
+        logging.debug(f"Chose random file '{value}' from path '{input_value}'.")
     else:
         logging.debug(f"Received exactly one input value '{input_value}'.")
         value = input_value
@@ -174,21 +180,33 @@ def generate_scenario(options: dict) -> None:
         for n in range(n_to_create):
             agent_to_append = copy.deepcopy(agent_type_template)
 
-            agent_id = REPLACEMENT_IDENTIFIER + agent_name
-            agent_id += str(n) if n_to_create > 1 else ""
+            agent_to_append["Id"] = get_agent_id(agent_name, n, n_to_create)
 
-            agent_to_append["Id"] = agent_id
+            attributes = agent_to_append["Attributes"]
+            for attribute, value in agent_to_append["Attributes"].items():
+                attributes[attribute] = get_value_from_field(value)
+
             base_template["Agents"].append(agent_to_append)
 
             if contract_type_template:
                 contract_to_append = copy.deepcopy(contract_type_template)
-                replace_ids(contract_to_append, agent_id, external_ids)
+                replace_ids(contract_to_append, agent_to_append["Id"], external_ids)
                 base_template["Contracts"].extend(contract_to_append)
 
     resolve_ids(base_template)
     os.chdir(cwd)
     options["scenario_path"] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml")
     write_yaml(base_template, options["scenario_path"])
+
+
+def get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int) -> str:
+    """
+    Returns `agent_id` with leading REPLACEMENT_IDENTIFIER for `agent_name` considering its `agent_number`
+    and `n_of_agents_to_create`
+    """
+    agent_id = REPLACEMENT_IDENTIFIER + agent_name
+    agent_id += str(agent_number) if n_of_agents_to_create > 1 else ""
+    return agent_id
 
 
 def set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:
