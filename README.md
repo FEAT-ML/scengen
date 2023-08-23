@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 [![PyPI version](https://badge.fury.io/py/scengen.svg)](https://badge.fury.io/py/scengen)
 [![PyPI license](https://img.shields.io/pypi/l/scengen.svg)](https://badge.fury.io/py/scengen)
 [![PyTests](https://github.com/FEAT-ML/scenario-generator/actions/workflows/python-app.yml/badge.svg)](https://github.com/FEAT-ML/scenario-generator/actions/workflows/python-app.yml)
-[![coverage report](docu/coverage.svg)](https://github.com/FEAT-ML/scenario-generator)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+<!-- [![coverage report](docu/coverage.svg)](https://github.com/FEAT-ML/scenario-generator)  to be enabled once badge is created and stored correctly, see issue #30-->
 
 # scengen
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
