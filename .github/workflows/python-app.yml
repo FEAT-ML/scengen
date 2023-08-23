@@ -37,3 +37,10 @@ jobs:
         coverage run --source=scengen -m pytest --junitxml=report.xml
         coverage report -m
         coverage html
+    - name: Generate coverage badge
+      run: |
+        coverage-badge -o coverage.svg
+    - name: Add badge to README.md
+      run: |
+        cp coverage.svg path_to_your_readme_folder
+        echo '![](https://github.com/FEAT-ML/scenario-generator/coverage.svg)' >> https://github.com/FEAT-ML/scenario-generator/README.md
