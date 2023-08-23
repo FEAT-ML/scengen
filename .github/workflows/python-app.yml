@@ -34,7 +34,6 @@ jobs:
         pip install .
     - name: Test with pytest and calculate coverage
       run: |
-        pytest --cov=scengen
-    - name: Generate coverage report
-      run: |
+        coverage run --source=scengen -m pytest --junitxml=report.xml
         coverage report -m
+        coverage html
