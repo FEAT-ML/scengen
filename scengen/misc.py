@@ -36,6 +36,20 @@ def increase_count_in_trace_file(options: dict) -> None:
     logging.debug(f"Increased trace file count to '{trace_file['total_count']}'")
 
 
+def save_seed_to_trace_file(options: dict, seed: int) -> None:
+    """Saves seed to trace file"""
+    config = load_yaml(options[CreateOptions.CONFIG])
+    cwd = os.getcwd()
+    os.chdir(Path(options[CreateOptions.CONFIG]).parent)
+    trace_file_name = config["defaults"]["trace_file"]
+    trace_file = load_yaml(trace_file_name)
+    trace_file["seed"] = seed
+    with open(trace_file_name, "w") as file:
+        yaml.dump(trace_file, file, default_flow_style=False)
+    os.chdir(cwd)
+    logging.debug(f"Stored seed '{seed}' to tracefile")
+
+
 def write_yaml(output_file: dict, output_file_path: Path) -> None:
     """Writes given `output_file` to `output_file_path` (ending in .yaml)"""
     check_if_valid_yaml_path(output_file_path)

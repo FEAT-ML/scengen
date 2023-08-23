@@ -13,7 +13,7 @@ from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
-from scengen.misc import write_yaml
+from scengen.misc import write_yaml, save_seed_to_trace_file
 
 SPLIT_IDENTIFIER = ";"
 RANGE_IDENTIFIER = "range"
@@ -51,7 +51,7 @@ def generate_scenario(options: dict) -> None:
         type_template = load_yaml(Path(agent["type_template"]))
         agent_type_template = type_template["Agents"]
         contract_type_template = type_template.get("Contracts")
-        n_to_create = get_value_from_field(agent["count"], allow_negative=False)
+        n_to_create = get_value_from_field(agent["count"], options, allow_negative=False)
         agent_name = agent["this_agent"]
         external_ids = agent.get("external_ids")
 
@@ -62,7 +62,7 @@ def generate_scenario(options: dict) -> None:
 
             attributes = agent_to_append["Attributes"]
             for attribute, value in agent_to_append["Attributes"].items():
-                attributes[attribute] = process_value(value)
+                attributes[attribute] = process_value(value, options)
 
             base_template["Agents"].append(agent_to_append)
 
@@ -109,10 +109,19 @@ def extract_numbers_from_string(input_value: str) -> str:
 
 
 def digest_choose(input_value: str) -> List[Union[int, float, str]]:
-    options = input_value.lower().replace(CHOOSE_IDENTIFIER, "").replace("(", "").replace(")", "").replace(" ", "").replace('"', '').replace("'", "")
-    options = options.split(SPLIT_IDENTIFIER)
-    options = cast_numeric_strings(options)
-    return options
+    """Returns List of options digested from given `input_value` string"""
+    given_options = (
+        input_value.lower()
+        .replace(CHOOSE_IDENTIFIER, "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace(" ", "")
+        .replace('"', "")
+        .replace("'", "")
+    )
+    given_options = given_options.split(SPLIT_IDENTIFIER)
+    given_options = cast_numeric_strings(given_options)
+    return given_options
 
 
 def cast_numeric_strings(values: List[str]) -> List[Union[int, float, str]]:
@@ -130,15 +139,36 @@ def cast_numeric_strings(values: List[str]) -> List[Union[int, float, str]]:
     return casted_values
 
 
-def digest_pickfile(input_value: str) -> str:
-    pass
+def digest_pickfile(input_value: str, scenario_path: Path) -> List[str]:
+    """Returns List of all files in given directory `input_value`"""
+    relative_path = (
+        input_value.lower()
+        .replace(PICKFILE_IDENTIFIER, "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace(" ", "")
+        .replace('"', "")
+        .replace("'", "")
+    )
+    path_to_dir = Path(scenario_path, relative_path)
+    files_in_dir = get_relative_paths_in_dir(path_to_dir, relative_path)
+    return files_in_dir
 
 
-def get_value_from_field(input_value: Union[List[Any], Any], allow_negative: bool = True) -> Any:
+def get_relative_paths_in_dir(path_to_dir: Path, relative_path: str) -> List[str]:
+    """Returns files in `path_to_dir` with suffix of `relative_path`"""
+    files_in_dir = [
+        str(Path(relative_path, f)) for f in os.listdir(path_to_dir) if os.path.isfile(os.path.join(path_to_dir, f))
+    ]
+    return files_in_dir
+
+
+def get_value_from_field(input_value: Union[List[Any], Any], options: dict, allow_negative: bool = True) -> Any:
     """
     Returns value stored in `input_value` based on the user specification 'RANGE_IDENTIFIER', 'CHOOSE_IDENTIFIER',
     'PICKFILE_IDENTIFIER' or else just `input_value`.
     In option `RANGE_IDENTIFIER`, `allow_negative` is True as default but can limit allowed range to values >=0.
+    In option `PICKFILE_IDENTIFIER`, `options[CreateOptions.DIRECTORY]` is used to get files with relative paths to scenario
     """
     if isinstance(input_value, str):
         if RANGE_IDENTIFIER in input_value.lower():
@@ -148,12 +178,12 @@ def get_value_from_field(input_value: Union[List[Any], Any], allow_negative: boo
             value = random.randint(minimum, maximum)
             logging.debug(f"Chose random value '{value}' from '{input_value}'.")
         elif CHOOSE_IDENTIFIER in input_value.lower():
-            options_to_choose = digest_choose(input_value)
-            value = random.choice(options_to_choose)
+            to_choose = digest_choose(input_value)
+            value = random.choice(to_choose)
             logging.debug(f"Chose random value '{value}' from list '{input_value}'.")
         elif PICKFILE_IDENTIFIER in input_value.lower():
-            options_to_pick = digest_pickfile(input_value)
-            value = random.choice(options_to_pick)
+            to_pick = digest_pickfile(input_value, options[CreateOptions.DIRECTORY])
+            value = random.choice(to_pick)
             logging.debug(f"Chose random file '{value}' from path '{input_value}'.")
         else:
             value = input_value
@@ -230,17 +260,17 @@ def resolve_ids(scenario: dict) -> None:
                     log_and_raise_critical(ERR_FAILED_RESOLVE_ID.format(value, contract))
 
 
-def process_value(input_value: Any) -> Any:
+def process_value(input_value: Any, options: dict) -> Any:
     """
     Iterates over (potentially nested) `input_value` and returns values from fields
     considering options in `get_value_from_field`
     """
     if isinstance(input_value, list):
-        return [process_value(item) for item in input_value]
+        return [process_value(item, options) for item in input_value]
     elif isinstance(input_value, dict):
-        return {key: process_value(value) for key, value in input_value.items()}
+        return {key: process_value(value, options) for key, value in input_value.items()}
     else:
-        return get_value_from_field(input_value)
+        return get_value_from_field(input_value, options)
 
 
 def get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int) -> str:
@@ -259,6 +289,7 @@ def set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:
         random_seed = get_random_seed(defaults)
         random.seed(random_seed)
         options["random_seed"] = trace_file["random_seed"] = random_seed
+        save_seed_to_trace_file(options, random_seed)
 
 
 def get_random_seed(defaults: dict) -> int:
