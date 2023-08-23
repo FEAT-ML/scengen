@@ -11,7 +11,9 @@ from scengen.generator import (
     get_all_ids_from,
     get_random_seed,
     digest_range,
-    extract_numbers_from_string, get_agent_id,
+    extract_numbers_from_string,
+    get_agent_id,
+    cast_numeric_strings,
 )
 
 
@@ -25,7 +27,8 @@ class Test:
         validate_input_range(values, allow_negative=True)
 
     @pytest.mark.parametrize(
-        "values", ["any string", [], "", 3.5, -1, 0, [-4, -1], [0, 10], [10, 20, 30], [10, 30], [10, "any string"], (-3, 10)]
+        "values",
+        ["any string", [], "", 3.5, -1, 0, [-4, -1], [0, 10], [10, 20, 30], [10, 30], [10, "any string"], (-3, 10)],
     )
     def test_validate_input_range__invalid_type(self, values):
         with pytest.raises(Exception):
@@ -103,11 +106,11 @@ class Test:
         seed = get_random_seed(defaults)
         assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
 
-    @pytest.mark.parametrize("values, expected", [("range(0, 4)", (0, 4)), ("RaNGE(-10, 30)", (-10, 30))])
+    @pytest.mark.parametrize("values, expected", [("range(0; 4)", (0, 4)), ("RaNGE(-10; 30)", (-10, 30))])
     def test_digest_range__valid_input(self, values, expected):
         assert digest_range(values) == expected
 
-    @pytest.mark.parametrize("values", [("rnge(0, 4)"), ("range[10, 30]")])
+    @pytest.mark.parametrize("values", [("rnge(0; 4)"), ("range[10; 30]")])
     def test_digest_range__invalid_input(self, values):
         with pytest.raises(Exception):
             digest_range(values)
@@ -116,9 +119,24 @@ class Test:
     def test_extract_numbers_from_string(self, values, expected):
         assert extract_numbers_from_string(values) == expected
 
-    @pytest.mark.parametrize("name, agent_n, total_n, expected", [("MyAgent", 2, 3, "//MyAgent2"),
-                                                                  ("MyAgent", 3, 3, "//MyAgent3"),
-                                                                  ("MyAgent", 1, 1, "//MyAgent"),
-                                                                  ])
+    @pytest.mark.parametrize(
+        "name, agent_n, total_n, expected",
+        [
+            ("MyAgent", 2, 3, "//MyAgent2"),
+            ("MyAgent", 3, 3, "//MyAgent3"),
+            ("MyAgent", 1, 1, "//MyAgent"),
+        ],
+    )
     def test_get_agent_id(self, name, agent_n, total_n, expected):
         assert get_agent_id(name, agent_n, total_n) == expected
+
+    @pytest.mark.parametrize(
+        "values, expected",
+        [
+            (["3", "my_string", "4.0"], [3, "my_string", 4.0]),
+            ([], []),
+            (["path/5.csv"], ["path/5.csv"]),
+        ],
+    )
+    def test_cast_numeric_strings(self, values, expected):
+        assert cast_numeric_strings(values) == expected
