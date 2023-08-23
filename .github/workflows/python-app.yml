@@ -42,6 +42,7 @@ jobs:
         coverage-badge -o coverage.svg
     - name: Upload badge to repository
       run: |
+        mkdir -p docu
         mv coverage.svg docu/
     - name: Update README.md with badge
       run: |
