@@ -28,10 +28,22 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        pip install pytest  pytest-cov coverage coverage-badge
     - name: Install the package
       run: |
         pip install .
-    - name: Test with pytest
+    - name: Test with pytest and calculate coverage
       run: |
-        pytest
+        coverage run --source=scengen -m pytest --junitxml=report.xml
+        coverage report -m
+        coverage html
+    - name: Generate coverage badge
+      run: |
+        coverage-badge -o coverage.svg
+    - name: Upload badge to repository
+      run: |
+        mkdir -p docu
+        mv coverage.svg docu/
+    - name: Update README.md with badge
+      run: |
+        echo '![](docu/coverage.svg)' >> README.md
