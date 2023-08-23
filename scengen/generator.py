@@ -6,7 +6,7 @@ import logging
 import os
 from pathlib import Path
 import random
-from typing import Union, List, NoReturn, Dict
+from typing import Union, List, NoReturn, Dict, Any, Tuple
 import time
 
 from fameio.source.loader import load_yaml
@@ -15,55 +15,63 @@ from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
 from scengen.misc import write_yaml
 
+RANGE_IDENTIFIER = "range"
+
 REPLACEMENT_IDENTIFIER = "//"
 KEY_THISAGENT = f"{REPLACEMENT_IDENTIFIER}THISAGENT"
 
-ERR_INVALID_INPUT_N_AGENTS_TO_CREATE = (
-    "Number of agents to create: Please specify either a positive int value or a "
-    "List of [minimum, maximum]. Received `{}` instead."
+ERR_INVALID_RANGE_INPUT = (
+    "Received invalid range input in form '{}'. Please provide in format "
+    "'range(minimum_integer, maximum_integer)'. Both integers must be >= 0."
 )
 ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
 
 
-def validate_input_range(input_range: Union[List[int], int]) -> NoReturn:
+def validate_input_range(input_range: Tuple[int, int]) -> NoReturn:
     """Raises Exception if input range is not positive int or list of [minimum, maximum]"""
-    if isinstance(input_range, int):
-        if input_range < 1:
-            log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
-    elif isinstance(input_range, list) and len(input_range) == 2 and all(isinstance(i, int) for i in input_range):
-        if any(i < 1 for i in input_range):
-            log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
+    if isinstance(input_range, tuple) and len(input_range) == 2 and all(isinstance(i, int) for i in input_range):
+        if any(i < 0 for i in input_range):
+            log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range))
         if input_range[0] >= input_range[1]:
-            log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
+            log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range))
     else:
-        log_and_raise_critical(ERR_INVALID_INPUT_N_AGENTS_TO_CREATE.format(input_range))
+        log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range))
 
 
-def n_agents_to_create(input_range: Union[List[int], int]) -> int:
+def digest_range(input_value: str) -> Tuple[int, int]:
+    """Returns Tuple of minimum and maximum integer value digested from `input_value` in expected form"""
+    numbers = extract_numbers_from_string(input_value)
+    try:
+        min_value, max_value = map(int, numbers.split(","))
+    except ValueError:
+        log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_value))
+    return min_value, max_value
+
+
+def extract_numbers_from_string(input_value: str) -> str:
+    """Returns string in form 'int, int' from given `input_value` by removing RANGE_IDENTIFIER and '(' and ')'"""
+    extracted_numbers = input_value.lower().replace(RANGE_IDENTIFIER, "").replace("(", "").replace(")", "")
+    return extracted_numbers
+
+
+def get_value_from_field(input_value: Union[List[Any], Any]) -> Any:
     """
-    Defines number of agents to create based on `input_range`.
-    If `input_range` is an int -> this int is returned
-    If `input_range` is a list of [minimum, maximum] -> a random int based on `random_seed` is returned
-    All other cases log a critical error and raise an Exception.
-
-    Args:
-        input_range: either an int or a list of [minimum, maximum]
-
-    Returns:
-        Number of agents to create
-    Raises:
-        Exception if input_range is invalid
+    Returns value stored in `input_value` based on the user specification [fixed value, one out of List,
+    random in range]
     """
-    validate_input_range(input_range)
-
-    if isinstance(input_range, int):
-        logging.debug(f"Received exactly one input value `{input_range}`.")
-        n_to_create = input_range
-    else:
+    if RANGE_IDENTIFIER in input_value.lower():
+        input_range = digest_range(input_value)
+        validate_input_range(input_range)
         minimum, maximum = input_range
-        n_to_create = random.randint(minimum, maximum)
-
-    return n_to_create
+        value = random.randint(minimum, maximum)
+        logging.debug(f"Chose random value '{value}' from '{input_value}'.")
+    elif isinstance(input_value, list):
+        value = random.choice(input_value)
+        logging.debug(f"Chose random value '{value}' from list '{input_value}'.")
+    else:
+        logging.debug(f"Received exactly one input value '{input_value}'.")
+        value = input_value
+    return value
 
 
 def replace_ids(contracts: List[dict], agent_id: str, ext_id: Union[dict, None]) -> None:
@@ -152,7 +160,7 @@ def generate_scenario(options: dict) -> None:
         type_template = load_yaml(Path(agent["type_template"]))
         agent_type_template = type_template["Agents"]
         contract_type_template = type_template.get("Contracts")
-        n_to_create = n_agents_to_create(agent["count"])
+        n_to_create = get_value_from_field(agent["count"])
         agent_name = agent["this_agent"]
         external_ids = agent.get("external_ids")
 
