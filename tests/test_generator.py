@@ -1,5 +1,5 @@
 import time
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import pytest
 
@@ -10,20 +10,29 @@ from scengen.generator import (
     replace_in_dict,
     get_all_ids_from,
     get_random_seed,
+    digest_range,
+    extract_numbers_from_string,
+    get_agent_id,
+    cast_numeric_strings,
 )
 
 
 class Test:
-    @pytest.mark.parametrize("values", [5, [10, 20]])
-    def test_validate_input_range__valid(self, values):
-        validate_input_range(values)
+    @pytest.mark.parametrize("values", [(10, 20), (1, 2), (1, 11111111111), (0, 3)])
+    def test_validate_input_range__valid(self, values: Tuple[int, int]):
+        validate_input_range(values, allow_negative=False)
+
+    @pytest.mark.parametrize("values", [(-10, 0), (-2, 1), (-0, 11111111111)])
+    def test_validate_input_range__valid(self, values: Tuple[int, int]):
+        validate_input_range(values, allow_negative=True)
 
     @pytest.mark.parametrize(
-        "values", ["any string", [], "", 3.5, -1, 0, [-4, -1], [0, 10], [10, 20, 30], [30, 10], [10, "any string"]]
+        "values",
+        ["any string", [], "", 3.5, -1, 0, [-4, -1], [0, 10], [10, 20, 30], [10, 30], [10, "any string"], (-3, 10)],
     )
     def test_validate_input_range__invalid_type(self, values):
         with pytest.raises(Exception):
-            validate_input_range(values)
+            validate_input_range(values, allow_negative=False)
 
     @pytest.mark.parametrize(
         "unique_list, new_id, expected",
@@ -96,3 +105,38 @@ class Test:
     def test_get_random_seed__default(self, defaults):
         seed = get_random_seed(defaults)
         assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
+
+    @pytest.mark.parametrize("values, expected", [("range(0; 4)", (0, 4)), ("RaNGE(-10; 30)", (-10, 30))])
+    def test_digest_range__valid_input(self, values, expected):
+        assert digest_range(values) == expected
+
+    @pytest.mark.parametrize("values", [("rnge(0; 4)"), ("range[10; 30]")])
+    def test_digest_range__invalid_input(self, values):
+        with pytest.raises(Exception):
+            digest_range(values)
+
+    @pytest.mark.parametrize("values, expected", [("range(0, 4)", "0, 4"), ("RaNgE(1, 23", "1, 23")])
+    def test_extract_numbers_from_string(self, values, expected):
+        assert extract_numbers_from_string(values) == expected
+
+    @pytest.mark.parametrize(
+        "name, agent_n, total_n, expected",
+        [
+            ("MyAgent", 2, 3, "//MyAgent2"),
+            ("MyAgent", 3, 3, "//MyAgent3"),
+            ("MyAgent", 1, 1, "//MyAgent"),
+        ],
+    )
+    def test_get_agent_id(self, name, agent_n, total_n, expected):
+        assert get_agent_id(name, agent_n, total_n) == expected
+
+    @pytest.mark.parametrize(
+        "values, expected",
+        [
+            (["3", "my_string", "4.0"], [3, "my_string", 4.0]),
+            ([], []),
+            (["path/5.csv"], ["path/5.csv"]),
+        ],
+    )
+    def test_cast_numeric_strings(self, values, expected):
+        assert cast_numeric_strings(values) == expected

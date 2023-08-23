@@ -51,6 +51,15 @@ The procedure, handled by the `workflow.py`, is as follows:
 4. The `evaluator.py` checks if the results seem plausible. See the section on `evaluation` for further details. 
 5. The next scenario generation is triggered if previous evaluation was negative, or the number of requested scenarios is not yet met
 
+#### `generation`
+You have four main options to define input to agents attributes:
+1. use a **fixed** value, e.g. `DemandSeries: timeseries/demand/load.csv`
+2. use a **random draw** of **dedicated options** (separated by `;`) with Keyword `choose`, e.g. `DemandSeries: choose("timeseries/demand/load1.csv"; timeseries/demand/load2.csv; 1000)`
+3. use a **random file** from **directory** with Keyword `pickfile`, e.g. `DemandSeries: pickfile(timeseries/demand)`
+4. use a **random draw** in **range** (separated by `;`) with Keyword `range`, e.g. `DemandSeries: range(1000; 1300)`
+
+See also the exemplary files in section `Relevant Files`.
+
 #### `estimation`
 The following checks are implemented:
 * Checks if there are any installed capacities in the scenario
@@ -75,7 +84,9 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
-    count: 1 range(1, 3) [1, 3]
+    count: 1  # use fixed value
+    # count: range(1; 3)  # use a random draw between range (here: 1 as minimum and 3 as maximum)
+    # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
     this_agent: "demandTraderDE" # link to other dynamically created agents by name
     external_ids: 
       exchange: "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
@@ -101,8 +112,14 @@ Agents:
   Type: DemandTrader
   Attributes:
     Loads:
-      - ValueOfLostLoad: 10000.0  [100, 10000], range(100, 10000)
-        DemandSeries: "00_StdConfig/data/export/DE_DemandPositiveOnly_In_MWh.csv"
+      - ValueOfLostLoad: 10000.0
+        DemandSeries: timeseries/demand/load.csv  # use fixed value
+      - ValueOfLostLoad: 9999.0
+        DemandSeries: choose("timeseries/demand/load1.csv"; timeseries/demand/load2.csv; 1000)  # use a random draw of dedicated options (here: one of the options separated by ';')
+      - ValueOfLostLoad: 8888.0
+        DemandSeries: pickfile(timeseries/demand)  # use random file from directory
+      - ValueOfLostLoad: 7777.0
+        DemandSeries: range(1000; 1300)  # use a random draw between range (here: 1000 as minimum and 1300 as maximum)
         
 Contracts:
   - SenderId: //exchange  # external agent
