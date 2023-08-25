@@ -15,7 +15,7 @@ from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
 from scengen.misc import write_yaml, save_seed_to_trace_file
 
-SPLIT_IDENTIFIER = ";"
+SEPARATOR = ";"
 RANGE_IDENTIFIER = "range"
 CHOOSE_IDENTIFIER = "choose"
 PICKFILE_IDENTIFIER = "pickfile"
@@ -29,48 +29,45 @@ ERR_INVALID_RANGE_INPUT = (
 )
 ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
 ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
+DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 
 
 def generate_scenario(options: dict) -> None:
     """Generates a new scenario based on `options` and `scenario_name` stored in `CreateOptions.DIRECTORY`"""
     config = load_yaml(options[CreateOptions.CONFIG])
+
     cwd = os.getcwd()
     os.chdir(Path(options[CreateOptions.CONFIG]).parent)
-    defaults = config["defaults"]
 
+    defaults = config["defaults"]
     trace_file = load_yaml(defaults["trace_file"])
     count = trace_file["total_count"]
-
     set_random_seed(defaults, options, trace_file)
-
     options["scenario_name"] = defaults["base_name"] + f"_{count}"
-
     base_template = load_yaml(config["base_template"])
 
-    for agent in config["create"]:
-        type_template = load_yaml(Path(agent["type_template"]))
-        agent_type_template = type_template["Agents"]
-        contract_type_template = type_template.get("Contracts")
-        n_to_create = get_value_from_field(agent["count"], options, allow_negative=False)
-        agent_name = agent["this_agent"]
-        external_ids = agent.get("external_ids")
+    if "create" in config:
+        for agent in config["create"]:
+            type_template = load_yaml(Path(agent["type_template"]))
+            agent_type_template = type_template["Agents"]
+            contract_type_template = type_template.get("Contracts")
+            n_to_create = round(get_value_from_field(agent["count"], options, allow_negative=False))
+            agent_name = agent["this_agent"]
+            external_ids = agent.get("external_ids")
 
-        for n in range(n_to_create):
-            agent_to_append = copy.deepcopy(agent_type_template)
+            for n in range(n_to_create):
+                agent_to_append = copy.deepcopy(agent_type_template)
+                agent_to_append["Id"] = get_agent_id(agent_name, n, n_to_create)
+                base_template["Agents"].append(agent_to_append)
 
-            agent_to_append["Id"] = get_agent_id(agent_name, n, n_to_create)
+                if contract_type_template:
+                    contract_to_append = copy.deepcopy(contract_type_template)
+                    replace_ids_in_contracts(contract_to_append, agent_to_append["Id"], external_ids)
+                    base_template["Contracts"].extend(contract_to_append)
+    else:
+        logging.debug(DEBUG_NO_CREATE)
 
-            attributes = agent_to_append["Attributes"]
-            for attribute, value in agent_to_append["Attributes"].items():
-                attributes[attribute] = process_value(value, options)
-
-            base_template["Agents"].append(agent_to_append)
-
-            if contract_type_template:
-                contract_to_append = copy.deepcopy(contract_type_template)
-                replace_ids(contract_to_append, agent_to_append["Id"], external_ids)
-                base_template["Contracts"].extend(contract_to_append)
-
+    resolve_identifiers(base_template, options)
     resolve_ids(base_template)
     os.chdir(cwd)
     options["scenario_path"] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml")
@@ -79,10 +76,14 @@ def generate_scenario(options: dict) -> None:
 
 def validate_input_range(input_range: Tuple[int, int], allow_negative: bool) -> NoReturn:
     """
-    Raises Exception if input range is no int or list of [minimum, maximum], and
+    Raises Exception if input range is no int or float or list of [minimum, maximum], and
     values >= 0 (if `allow_negative` = False)
     """
-    if isinstance(input_range, tuple) and len(input_range) == 2 and all(isinstance(i, int) for i in input_range):
+    if (
+        isinstance(input_range, tuple)
+        and len(input_range) == 2
+        and all(isinstance(i, (int, float)) for i in input_range)
+    ):
         if not allow_negative:
             if any(i < 0 for i in input_range):
                 log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range, allow_negative))
@@ -96,7 +97,7 @@ def digest_range(input_value: str) -> Tuple[int, int]:
     """Returns Tuple of minimum and maximum integer value digested from `input_value` in expected form"""
     numbers = extract_numbers_from_string(input_value)
     try:
-        min_value, max_value = map(int, numbers.split(SPLIT_IDENTIFIER))
+        min_value, max_value = map(float, numbers.split(SEPARATOR))
     except ValueError:
         log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
     return min_value, max_value
@@ -119,7 +120,7 @@ def digest_choose(input_value: str) -> List[Union[int, float, str]]:
         .replace('"', "")
         .replace("'", "")
     )
-    given_options = given_options.split(SPLIT_IDENTIFIER)
+    given_options = given_options.split(SEPARATOR)
     given_options = cast_numeric_strings(given_options)
     return given_options
 
@@ -175,7 +176,7 @@ def get_value_from_field(input_value: Union[List[Any], Any], options: dict, allo
             input_range = digest_range(input_value)
             validate_input_range(input_range, allow_negative)
             minimum, maximum = input_range
-            value = random.randint(minimum, maximum)
+            value = random.uniform(minimum, maximum)
             logging.debug(f"Chose random value '{value}' from '{input_value}'.")
         elif CHOOSE_IDENTIFIER in input_value.lower():
             to_choose = digest_choose(input_value)
@@ -194,7 +195,7 @@ def get_value_from_field(input_value: Union[List[Any], Any], options: dict, allo
     return value
 
 
-def replace_ids(contracts: List[dict], agent_id: str, ext_id: Union[dict, None]) -> None:
+def replace_ids_in_contracts(contracts: List[dict], agent_id: str, ext_id: Union[dict, None]) -> None:
     """Replaces in-place `agent_id` and optional `ext_id` in given `contracts`"""
     replace_map = {KEY_THISAGENT: agent_id}
     if ext_id:
@@ -260,17 +261,22 @@ def resolve_ids(scenario: dict) -> None:
                     log_and_raise_critical(ERR_FAILED_RESOLVE_ID.format(value, contract))
 
 
-def process_value(input_value: Any, options: dict) -> Any:
+def resolve_identifiers(input_value: Any, options: dict) -> Any:
     """
     Iterates over (potentially nested) `input_value` and returns values from fields
     considering options in `get_value_from_field`
     """
-    if isinstance(input_value, list):
-        return [process_value(item, options) for item in input_value]
-    elif isinstance(input_value, dict):
-        return {key: process_value(value, options) for key, value in input_value.items()}
-    else:
-        return get_value_from_field(input_value, options)
+    for key, value in input_value.items():
+        if isinstance(value, dict):
+            resolve_identifiers(value, options)
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                if isinstance(item, dict):
+                    resolve_identifiers(item, options)
+                else:
+                    input_value[key][index] = get_value_from_field(item, options)
+        else:
+            input_value[key] = get_value_from_field(value, options)
 
 
 def get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int) -> str:
