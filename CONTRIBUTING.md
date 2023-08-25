@@ -52,6 +52,9 @@ We recommend Python 3.9 to build and run `scengen` and [Pip](https://pypi.org/) 
 Please follow the [PEP-8](https://peps.python.org/pep-0008/) style guide for Python, but limit line length to 120.
 Please follow [Google's](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) conventions for docstrings.
 
+#### Release Name Theme
+We use landforms of [this list](https://en.wikipedia.org/wiki/Glossary_of_landforms). 
+
 ### Before submitting
 Please, check the following points before submitting a pull request:
 1. Please fill in the [Contributor License Agreement](CLA.md) and send it to [amiris@dlr.de](mailto:amiris@dlr.de).
@@ -64,4 +67,4 @@ Please, check the following points before submitting a pull request:
 1. Contact the main developers via [amiris@dlr.de](mailto:amiris@dlr.de) or at [openMod Forum](https://forum.openmod.org/tag/amiris) in case you've got any questions.
 
 # List of Contributors
-see file [Citation.cff](CITATION.cff)
+See file [Citation.cff](CITATION.cff)
