@@ -44,7 +44,7 @@ def generate_scenario(options: dict) -> None:
     count = trace_file["total_count"]
     set_random_seed(defaults, options, trace_file)
     options["scenario_name"] = defaults["base_name"] + f"_{count}"
-    base_template = load_yaml(config["base_template"])
+    scenario = load_yaml(config["base_template"])
 
     if "create" in config:
         for agent in config["create"]:
@@ -58,20 +58,20 @@ def generate_scenario(options: dict) -> None:
             for n in range(n_to_create):
                 agent_to_append = copy.deepcopy(agent_type_template)
                 agent_to_append["Id"] = get_agent_id(agent_name, n, n_to_create)
-                base_template["Agents"].append(agent_to_append)
+                scenario["Agents"].append(agent_to_append)
 
                 if contract_type_template:
                     contract_to_append = copy.deepcopy(contract_type_template)
                     replace_ids_in_contracts(contract_to_append, agent_to_append["Id"], external_ids)
-                    base_template["Contracts"].extend(contract_to_append)
+                    scenario["Contracts"].extend(contract_to_append)
     else:
         logging.debug(DEBUG_NO_CREATE)
 
-    resolve_identifiers(base_template, options)
-    resolve_ids(base_template)
+    resolve_identifiers(scenario, options)
+    resolve_ids(scenario)
     os.chdir(cwd)
     options["scenario_path"] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml")
-    write_yaml(base_template, options["scenario_path"])
+    write_yaml(scenario, options["scenario_path"])
 
 
 def validate_input_range(input_range: Tuple[int, int], allow_negative: bool) -> NoReturn:
@@ -293,7 +293,7 @@ def set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:
     """Sets random seed if not yet saved to `options['random_seed']`"""
     if not options.get("random_seed"):
         random_seed = get_random_seed(defaults)
-        random.seed(random_seed)
+        random.seed(random_seed + trace_file["total_count"])
         options["random_seed"] = trace_file["random_seed"] = random_seed
         save_seed_to_trace_file(options, random_seed)
 
