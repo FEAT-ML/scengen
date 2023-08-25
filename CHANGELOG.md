@@ -2,5 +2,14 @@
 
 SPDX-License-Identifier: CC0-1.0 -->
 
-# Release Name - v0.1 (Tba.)
-Initial release of `scengen` - the scenario generator for the open electricity market model AMIRIS
+# Abyssal plain - v0.1.1 (tba.)
+## Added: 
+* `generation`: options (`choose()`, `pickfile()`, `range()`) can be also used in `base_template` directly (this is recommended, when number of agents is not to be varied.)
+* `generation`: `range()` now supports integer and float values
+
+## Fixed:
+* `generation`: ensured randomization is working as expected by adding `total_count` from `trace_file.yaml` to random seed
+* `generation`: works with no `create` section in `GeneratorConfig` as expected
+
+# Abyssal fan - v0.1 (2023-08-24)
+Beta release of core functionalities of `scengen` - the scenario generator for the open electricity market model AMIRIS

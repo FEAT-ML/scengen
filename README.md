@@ -12,13 +12,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
 
 ## Installation
+The package is not yet deployed on PyPI. Therefore, clone this repository and install `scengen` to your desired Python environment with
 
-    pip install scengen
-
-You may also use `pipx`. For detailed information please refer to the official `pipx` [documentation](https://github.com/pypa/pipx).
-
-    pipx install scengen
-
+    pip install your/path/to/scengen/setup.py
 
 ### Further Requirements
 In order to execute `scengen` correctly, you also require a Java Development Kit (JDK).
@@ -60,6 +56,7 @@ You have four main options to define input to agents attributes:
 3. use a **random file** from **directory** with Keyword `pickfile`, e.g. `DemandSeries: pickfile(timeseries/demand)`
 4. use a **random draw** in **range** (separated by `;`) with Keyword `range`, e.g. `DemandSeries: range(1000; 1300)`
 
+These can also be applied to all other fields in the `base_template` file.
 See also the exemplary files in section `Relevant Files`.
 
 #### `estimation`
@@ -152,6 +149,7 @@ Its format is as follows:
 
 ```yaml
 total_count: 2  # number of all scenarios generated
+seed: 1234  # random seed stored here if scengen is called
 ```
 
 ### Help
