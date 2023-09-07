@@ -2,7 +2,11 @@
 
 SPDX-License-Identifier: CC0-1.0 -->
 
-# Abyssal plain - v0.1.1 (tba.)
+# Adriatic abyssal plain - v0.1.2 (2023-09-07)
+## Fixed:
+* execution as installed package works as expected
+
+# Abyssal plain - v0.1.1 (2023-08-24)
 ## Added: 
 * `generation`: options (`choose()`, `pickfile()`, `range()`) can be also used in `base_template` directly (this is recommended, when number of agents is not to be varied.)
 * `generation`: `range()` now supports integer and float values

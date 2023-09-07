@@ -6,7 +6,7 @@
 
 import logging
 
-from logs import log_and_print, set_up_logger
+from scengen.logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
 from scengen.estimator import estimate_scenario
 from scengen.generator import generate_scenario
@@ -15,7 +15,7 @@ from scengen.runner import execute_scenario
 from scengen.evaluator import evaluate_scenario
 
 
-def scengen() -> None:
+def scengen_cli() -> None:
     """Calls sub-commands with appropriate arguments as returned by the command line parser"""
     command, options = arg_handling_run()
     set_up_logger(options[GeneralOptions.LOG], options[GeneralOptions.LOGFILE])
@@ -58,4 +58,4 @@ def scengen() -> None:
 
 
 if __name__ == "__main__":
-    scengen()
+    scengen_cli()
