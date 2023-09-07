@@ -26,7 +26,7 @@ def readme():
 
 setup(
     name="scengen",  # noqa
-    version="0.1.1",
+    version="0.1.2",
     description="Scenario generator for the open electricity market model AMIRIS",
     long_description=readme(),
     long_description_content_type="text/markdown",
@@ -45,7 +45,7 @@ setup(
     packages=find_packages(),
     entry_points={
         "console_scripts": [
-            "scengen=workflow:scengen",  # noqa
+            "scengen=scengen:main",  # noqa
         ],
     },
     classifiers=[
