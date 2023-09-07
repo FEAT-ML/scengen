@@ -12,9 +12,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
 
 ## Installation
-The package is not yet deployed on PyPI. Therefore, clone this repository and install `scengen` to your desired Python environment with
+The package is not yet deployed on PyPI. Therefore, clone this repository, navigate to this repository in your directory, and install `scengen` to your prefered Python environment with
 
-    pip install your/path/to/scengen/setup.py
+    pip install .
 
 ### Further Requirements
 In order to execute `scengen` correctly, you also require a Java Development Kit (JDK).
