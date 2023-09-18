@@ -6,11 +6,11 @@ SPDX-License-Identifier: CC0-1.0 -->
 ## Fixed:
 *  directory `-d/--directory` is created when not present, [#36](https://github.com/FEAT-ML/scengen/issues/36)
 
-# Adriatic abyssal plain - [v0.1.2]((https://github.com/FEAT-ML/scengen/releases/tag/v0.1.2)) (2023-09-07)
+# Adriatic abyssal plain - [v0.1.2](https://github.com/FEAT-ML/scengen/releases/tag/v0.1.2) (2023-09-07)
 ## Fixed:
 * execution as installed package works as expected, [#34](https://github.com/FEAT-ML/scengen/issues/34)
 
-# Abyssal plain - [v0.1.1]((https://github.com/FEAT-ML/scengen/releases/tag/v0.1.1)) (2023-08-24)
+# Abyssal plain - [v0.1.1](https://github.com/FEAT-ML/scengen/releases/tag/v0.1.1) (2023-08-24)
 ## Added: 
 * `generation`: options (`choose()`, `pickfile()`, `range()`) can be also used in `base_template` directly (this is recommended, when number of agents is not to be varied.)
 * `generation`: `range()` now supports integer and float values
