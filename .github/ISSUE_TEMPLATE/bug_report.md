@@ -12,6 +12,7 @@ assignees: ''
 (Summarize the bug encountered concisely)
 
 # Environment
+1. scengen version: `x.x.x`
 1. Python version: `x.x.x`
 1. OS: `Win10`
 
