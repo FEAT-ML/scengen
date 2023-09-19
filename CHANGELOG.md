@@ -4,7 +4,8 @@ SPDX-License-Identifier: CC0-1.0 -->
 
 # Tba - v0.1.3 (Tba.)
 ## Fixed:
-*  directory `-d/--directory` is created when not present, [#36](https://github.com/FEAT-ML/scengen/issues/36)
+* directory `-d/--directory` is created when not present, [#36](https://github.com/FEAT-ML/scengen/issues/36)
+* relative paths in CLI are resolved correctly, [#38](https://github.com/FEAT-ML/scengen/issues/38)
 
 # Adriatic abyssal plain - [v0.1.2](https://github.com/FEAT-ML/scengen/releases/tag/v0.1.2) (2023-09-07)
 ## Fixed:
