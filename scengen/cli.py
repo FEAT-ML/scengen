@@ -89,7 +89,17 @@ def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
     args = vars(parent_parser.parse_args())
     command = Command[args.pop("command").upper()]
 
+    args = resolve_relative_paths(args)
+
     return command, enumify(command, args)
+
+
+def resolve_relative_paths(args: dict) -> dict:
+    """Returns given `args` with relative paths resolved as absolute paths"""
+    for option in args:
+        if isinstance(args[option], Path):
+            args[option] = args[option].resolve() if not args[option].is_absolute() else args[option]
+    return args
 
 
 def enumify(command: Command, args: dict) -> Dict[Enum, Any]:
