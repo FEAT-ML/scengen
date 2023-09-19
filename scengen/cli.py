@@ -98,7 +98,7 @@ def resolve_relative_paths(args: dict) -> dict:
     """Returns given `args` with relative paths resolved as absolute paths"""
     for option in args:
         if isinstance(args[option], Path):
-            args[option] = args[option].resolve() if not args[option].is_absolute() else args[option]
+            args[option] = args[option].resolve()
     return args
 
 
