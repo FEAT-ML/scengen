@@ -2,9 +2,9 @@
 
 SPDX-License-Identifier: Apache-2.0 -->
 
-[![PyPI version](https://badge.fury.io/py/scengen.svg)](https://badge.fury.io/py/scengen)
-[![PyPI license](https://img.shields.io/pypi/l/scengen.svg)](https://badge.fury.io/py/scengen)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyTests](https://github.com/FEAT-ML/scenario-generator/actions/workflows/python-app.yml/badge.svg)](https://github.com/FEAT-ML/scenario-generator/actions/workflows/python-app.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8382789.svg)](https://doi.org/10.5281/zenodo.8382789)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <!-- [![coverage report](docu/coverage.svg)](https://github.com/FEAT-ML/scenario-generator)  to be enabled once badge is created and stored correctly, see issue #30-->
 
