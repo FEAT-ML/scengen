@@ -165,7 +165,7 @@ Christoph Schimeczek, Kristina Nienhaus, Ulrich Frey, Evelyn Sperber, Seyedfarza
 
 and 
 
-Felix Nitsch, Ulrich Frey, Christoph Schimeczek (2023). scengen - A Scenario Generator for the Open Electricity Market Model AMIRIS. Zenodo. [10.5281/zenodo.8382790](https://doi.org/10.5281/zenodo.8382790)
+Felix Nitsch, Ulrich Frey, Christoph Schimeczek (2023). scengen - A Scenario Generator for the Open Electricity Market Model AMIRIS. Zenodo. doi: [10.5281/zenodo.8382790](https://doi.org/10.5281/zenodo.8382790)
 
 ## Contributing
 Please see [CONTRIBUTING](CONTRIBUTING.md).
