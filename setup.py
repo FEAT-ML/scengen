@@ -54,7 +54,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "amirispy>=1.3,<2",
+        "amirispy>=1.4,<2",
         "fameio>=1.8.1,<2",
         "pandas>2.0,<3",
     ],

@@ -3,6 +3,9 @@
 SPDX-License-Identifier: CC0-1.0 -->
 
 # Barrier bar - v0.2.0 (2024-04-02)
+## Changed:
+* **Breaking**: upgraded dependency to `amirispy>=1.4`
+
 ## Fixed:
 * directory `-d/--directory` is created when not present, [#36](https://github.com/FEAT-ML/scengen/issues/36)
 * relative paths in CLI are resolved correctly, [#38](https://github.com/FEAT-ML/scengen/issues/38)
