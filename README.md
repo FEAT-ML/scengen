@@ -40,6 +40,7 @@ Creates AMIRIS scenarios based on user defined input, estimates their plausibili
 | `-d` or `--directory`         | Directory to parse scenarios from and write results to                                                                            |
 | `-ses` or `--skip_estimation` | Speed-focused approach by omitting the AMIRIS scenario estimation at the expense of bypassing plausibility check (Default: False) |
 | `-sev` or `--skip_evaluation` | Speed-focused approach by omitting the AMIRIS result evaluation at the expense of bypassing plausibility check (Default: False)   |
+| `-a` or `--agents`            | Limit extraction to (list) of agent(s) for speed-up and memory saving (default=None)                                              |
 
 The procedure, handled by the `workflow.py`, is as follows:
 
@@ -83,7 +84,7 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
-    count: 1  # use fixed value
+    count: choose(1; 3)  # use fixed value
     # count: range(1; 3)  # use a random draw between range (here: 1 as minimum and 3 as maximum)
     # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
     this_agent: "demandTraderDE" # link to other dynamically created agents by name

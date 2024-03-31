@@ -5,7 +5,7 @@
 import argparse
 from enum import Enum, auto
 from pathlib import Path
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional, List
 
 from scengen.logs import LogLevels
 
@@ -30,6 +30,7 @@ CREATE_SKIP_EVALUATION_HELP = (
     "Speed-focused approach by omitting the AMIRIS result evaluation at the expense "
     "of bypassing plausibility check (Default: False)"
 )
+CREATE_AGENT_LIST_HELP = "Limit extraction to (list) of agent(s) for speed-up and memory saving (default=None)"
 
 
 class GeneralOptions(Enum):
@@ -54,6 +55,7 @@ class CreateOptions(Enum):
     DIRECTORY = auto()
     SKIP_ESTIMATION = auto()
     SKIP_EVALUATION = auto()
+    AGENTS = auto()
 
 
 Options = {
@@ -61,7 +63,7 @@ Options = {
 }
 
 
-def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
+def arg_handling_run(input_args: Optional[List[str]] = None) -> Tuple[Command, Dict[Enum, Any]]:
     """Handles command line arguments for `scengen` and returns `command` and its options `args`"""
     parent_parser = argparse.ArgumentParser(prog="scengen", description=SCENGEN_PARSER)
     parent_parser.add_argument("-lf", "--logfile", type=Path, required=False, help=SCENGEN_LOG_FILE_HELP)
@@ -85,8 +87,9 @@ def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
     create_parser.add_argument(
         "--skip_evaluation", "-sev", default=False, action="store_true", help=CREATE_SKIP_EVALUATION_HELP
     )
+    create_parser.add_argument("-a", "--agents", nargs="*", type=str, help=CREATE_AGENT_LIST_HELP)
 
-    args = vars(parent_parser.parse_args())
+    args = vars(parent_parser.parse_args(input_args))
     command = Command[args.pop("command").upper()]
 
     args = resolve_relative_paths(args)

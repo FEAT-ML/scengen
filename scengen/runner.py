@@ -29,6 +29,7 @@ def map_options(options: dict) -> dict:
     options[AMIRISGeneralOptions.LOG] = options[GeneralOptions.LOG]
     options[AMIRISGeneralOptions.LOGFILE] = options[GeneralOptions.LOGFILE]
     options[amiris.RunOptions.SCENARIO] = options["scenario_path"]
+    options[amiris.RunOptions.AGENTS] = options[CreateOptions.AGENTS]
     return options
 
 
