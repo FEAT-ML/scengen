@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+<!-- SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 
 SPDX-License-Identifier: Apache-2.0 -->
 
@@ -32,14 +32,15 @@ Currently, there is one command available:
 ### `scengen create`
 Creates AMIRIS scenarios based on user defined input, estimates their plausibility, executes them by calling AMIRIS, and evaluates their final performance.  
 
-| Option                        | Action                                                                                                                            |
-|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `-n` or `--number`            | Specify number of scenarios to be generated                                                                                       |
-| `-c` or `--config`            | Path to `configuration` YAML file defining specifications for creation of scenarios                                               |
-| `-j` or `--jar`               | Path to `amiris-core_<version>-jar-with-dependencies.jar`                                                                         |
-| `-d` or `--directory`         | Directory to parse scenarios from and write results to                                                                            |
-| `-ses` or `--skip_estimation` | Speed-focused approach by omitting the AMIRIS scenario estimation at the expense of bypassing plausibility check (Default: False) |
-| `-sev` or `--skip_evaluation` | Speed-focused approach by omitting the AMIRIS result evaluation at the expense of bypassing plausibility check (Default: False)   |
+| Option                        | Action                                                                                                                                                            |
+|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-n` or `--number`            | Specify number of scenarios to be generated                                                                                                                       |
+| `-c` or `--config`            | Path to `configuration` YAML file defining specifications for creation of scenarios                                                                               |
+| `-j` or `--jar`               | Path to `amiris-core_<version>-jar-with-dependencies.jar`                                                                                                         |
+| `-d` or `--directory`         | Directory to parse scenarios from and write results to                                                                                                            |
+| `-ses` or `--skip_estimation` | Speed-focused approach by omitting the AMIRIS scenario estimation at the expense of bypassing plausibility check (Default: False)                                 |
+| `-sev` or `--skip_evaluation` | Speed-focused approach by omitting the AMIRIS result evaluation at the expense of bypassing plausibility check (Default: False)                                   |
+| `-oo` or `--output-options`   | Optional arguments to override default output [conversion arguments of fameio](https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results) |
 
 The procedure, handled by the `workflow.py`, is as follows:
 
@@ -83,7 +84,7 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
-    count: 1  # use fixed value
+    count: choose(1; 3)  # use fixed value
     # count: range(1; 3)  # use a random draw between range (here: 1 as minimum and 3 as maximum)
     # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
     this_agent: "demandTraderDE" # link to other dynamically created agents by name

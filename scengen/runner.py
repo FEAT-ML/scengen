@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+# SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -29,6 +29,7 @@ def map_options(options: dict) -> dict:
     options[AMIRISGeneralOptions.LOG] = options[GeneralOptions.LOG]
     options[AMIRISGeneralOptions.LOGFILE] = options[GeneralOptions.LOGFILE]
     options[amiris.RunOptions.SCENARIO] = options["scenario_path"]
+    options[amiris.RunOptions.OUTPUT_OPTIONS] = options[CreateOptions.OUTPUT_OPTIONS]
     return options
 
 

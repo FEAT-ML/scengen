@@ -1,11 +1,11 @@
-# SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+# SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
 
 import argparse
 from enum import Enum, auto
 from pathlib import Path
-from typing import Tuple, Dict, Any
+from typing import Tuple, Dict, Any, Optional, List
 
 from scengen.logs import LogLevels
 
@@ -29,6 +29,10 @@ CREATE_SKIP_ESTIMATION_HELP = (
 CREATE_SKIP_EVALUATION_HELP = (
     "Speed-focused approach by omitting the AMIRIS result evaluation at the expense "
     "of bypassing plausibility check (Default: False)"
+)
+CREATE_OUTPUT_OPTION_HELP = (
+    "optional pass through of FAME-Io's output conversion options, see "
+    "https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results"
 )
 
 
@@ -54,6 +58,7 @@ class CreateOptions(Enum):
     DIRECTORY = auto()
     SKIP_ESTIMATION = auto()
     SKIP_EVALUATION = auto()
+    OUTPUT_OPTIONS = auto()
 
 
 Options = {
@@ -61,7 +66,7 @@ Options = {
 }
 
 
-def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
+def arg_handling_run(input_args: Optional[List[str]] = None) -> Tuple[Command, Dict[Enum, Any]]:
     """Handles command line arguments for `scengen` and returns `command` and its options `args`"""
     parent_parser = argparse.ArgumentParser(prog="scengen", description=SCENGEN_PARSER)
     parent_parser.add_argument("-lf", "--logfile", type=Path, required=False, help=SCENGEN_LOG_FILE_HELP)
@@ -85,8 +90,9 @@ def arg_handling_run() -> Tuple[Command, Dict[Enum, Any]]:
     create_parser.add_argument(
         "--skip_evaluation", "-sev", default=False, action="store_true", help=CREATE_SKIP_EVALUATION_HELP
     )
+    create_parser.add_argument("--output-options", "-oo", type=str, default="", help=CREATE_OUTPUT_OPTION_HELP)
 
-    args = vars(parent_parser.parse_args())
+    args = vars(parent_parser.parse_args(input_args))
     command = Command[args.pop("command").upper()]
 
     args = resolve_relative_paths(args)

@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+from typing import Optional, List
 
 from scengen.logs import log_and_print, set_up_logger
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
@@ -15,9 +16,9 @@ from scengen.runner import execute_scenario
 from scengen.evaluator import evaluate_scenario
 
 
-def scengen_cli() -> None:
+def scengen_cli(args: Optional[List[str]] = None) -> None:
     """Calls sub-commands with appropriate arguments as returned by the command line parser"""
-    command, options = arg_handling_run()
+    command, options = arg_handling_run(args)
     set_up_logger(options[GeneralOptions.LOG], options[GeneralOptions.LOGFILE])
     log_and_print("Starting scenario generator")
 

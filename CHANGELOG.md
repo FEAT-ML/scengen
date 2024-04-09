@@ -1,11 +1,17 @@
-<!-- SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+<!-- SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 
 SPDX-License-Identifier: CC0-1.0 -->
 
-# Tba - v0.1.3 (Tba.)
+# Barrier bar - v0.2.0 (2024-04-11)
+## Changed:
+* **Breaking**: upgraded dependency to `amirispy>=2.0`, [#47](https://github.com/FEAT-ML/scengen/issues/47)
+
 ## Fixed:
 * directory `-d/--directory` is created when not present, [#36](https://github.com/FEAT-ML/scengen/issues/36)
 * relative paths in CLI are resolved correctly, [#38](https://github.com/FEAT-ML/scengen/issues/38)
+
+## Added:
+* Option to pass through FAME-Io output conversion options using `-oo/--output-options`, [#47](https://github.com/FEAT-ML/scengen/issues/47)
 
 # Adriatic abyssal plain - [v0.1.2](https://github.com/FEAT-ML/scengen/releases/tag/v0.1.2) (2023-09-07)
 ## Fixed:

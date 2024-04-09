@@ -26,7 +26,7 @@ def readme():
 
 setup(
     name="scengen",  # noqa
-    version="0.1.3",
+    version="0.2.0",
     description="Scenario generator for the open electricity market model AMIRIS",
     long_description=readme(),
     long_description_content_type="text/markdown",
@@ -54,8 +54,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "amirispy>=1.3,<2",
-        "fameio>=1.8.1,<2",
+        "amirispy>=2.0,<3",
         "pandas>2.0,<3",
     ],
     extras_require={"dev": ["pytest>=7.2"]},
