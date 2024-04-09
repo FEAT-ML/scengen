@@ -54,8 +54,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        "amirispy>=1.4,<2",
-        "fameio>=1.8.1,<2",
+        "amirispy>=2.0,<3",
         "pandas>2.0,<3",
     ],
     extras_require={"dev": ["pytest>=7.2"]},
