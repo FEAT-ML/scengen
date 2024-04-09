@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+<!-- SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 
 SPDX-License-Identifier: Apache-2.0 -->
 
@@ -32,15 +32,15 @@ Currently, there is one command available:
 ### `scengen create`
 Creates AMIRIS scenarios based on user defined input, estimates their plausibility, executes them by calling AMIRIS, and evaluates their final performance.  
 
-| Option                        | Action                                                                                                                            |
-|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `-n` or `--number`            | Specify number of scenarios to be generated                                                                                       |
-| `-c` or `--config`            | Path to `configuration` YAML file defining specifications for creation of scenarios                                               |
-| `-j` or `--jar`               | Path to `amiris-core_<version>-jar-with-dependencies.jar`                                                                         |
-| `-d` or `--directory`         | Directory to parse scenarios from and write results to                                                                            |
-| `-ses` or `--skip_estimation` | Speed-focused approach by omitting the AMIRIS scenario estimation at the expense of bypassing plausibility check (Default: False) |
-| `-sev` or `--skip_evaluation` | Speed-focused approach by omitting the AMIRIS result evaluation at the expense of bypassing plausibility check (Default: False)   |
-| `-a` or `--agents`            | Limit extraction to (list) of agent(s) for speed-up and memory saving (default=None)                                              |
+| Option                        | Action                                                                                                                                                            |
+|-------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `-n` or `--number`            | Specify number of scenarios to be generated                                                                                                                       |
+| `-c` or `--config`            | Path to `configuration` YAML file defining specifications for creation of scenarios                                                                               |
+| `-j` or `--jar`               | Path to `amiris-core_<version>-jar-with-dependencies.jar`                                                                                                         |
+| `-d` or `--directory`         | Directory to parse scenarios from and write results to                                                                                                            |
+| `-ses` or `--skip_estimation` | Speed-focused approach by omitting the AMIRIS scenario estimation at the expense of bypassing plausibility check (Default: False)                                 |
+| `-sev` or `--skip_evaluation` | Speed-focused approach by omitting the AMIRIS result evaluation at the expense of bypassing plausibility check (Default: False)                                   |
+| `-oo` or `--output-options`   | Optional arguments to override default output [conversion arguments of fameio](https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results) |
 
 The procedure, handled by the `workflow.py`, is as follows:
 

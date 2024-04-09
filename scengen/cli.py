@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+# SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -30,7 +30,10 @@ CREATE_SKIP_EVALUATION_HELP = (
     "Speed-focused approach by omitting the AMIRIS result evaluation at the expense "
     "of bypassing plausibility check (Default: False)"
 )
-CREATE_AGENT_LIST_HELP = "Limit extraction to (list) of agent(s) for speed-up and memory saving (default=None)"
+CREATE_OUTPUT_OPTION_HELP = (
+    "optional pass through of FAME-Io's output conversion options, see "
+    "https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results"
+)
 
 
 class GeneralOptions(Enum):
@@ -55,7 +58,7 @@ class CreateOptions(Enum):
     DIRECTORY = auto()
     SKIP_ESTIMATION = auto()
     SKIP_EVALUATION = auto()
-    AGENTS = auto()
+    OUTPUT_OPTIONS = auto()
 
 
 Options = {
@@ -87,7 +90,7 @@ def arg_handling_run(input_args: Optional[List[str]] = None) -> Tuple[Command, D
     create_parser.add_argument(
         "--skip_evaluation", "-sev", default=False, action="store_true", help=CREATE_SKIP_EVALUATION_HELP
     )
-    create_parser.add_argument("-a", "--agents", nargs="*", type=str, help=CREATE_AGENT_LIST_HELP)
+    create_parser.add_argument("--output-options", "-oo", type=str, default="", help=CREATE_OUTPUT_OPTION_HELP)
 
     args = vars(parent_parser.parse_args(input_args))
     command = Command[args.pop("command").upper()]

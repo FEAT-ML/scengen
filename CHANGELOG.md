@@ -1,4 +1,4 @@
-<!-- SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+<!-- SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 
 SPDX-License-Identifier: CC0-1.0 -->
 
@@ -11,7 +11,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * relative paths in CLI are resolved correctly, [#38](https://github.com/FEAT-ML/scengen/issues/38)
 
 ## Added:
-* option to limit agent extraction to list of `-a/--agents`
+* Option to pass through FAME-Io output conversion options using `-oo/--output-options`, [#47](https://github.com/FEAT-ML/scengen/issues/47)
 
 # Adriatic abyssal plain - [v0.1.2](https://github.com/FEAT-ML/scengen/releases/tag/v0.1.2) (2023-09-07)
 ## Fixed:
