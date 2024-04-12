@@ -2,7 +2,11 @@
 
 SPDX-License-Identifier: CC0-1.0 -->
 
-# Barrier bar - v0.2.0 (2024-04-11)
+# Tba - v0.3.0 (Tba.)
+## Changed:
+* **Breaking**: Results are written to subfolders using the scenario name, [#49](https://github.com/FEAT-ML/scengen/issues/49)
+
+# Barrier bar - [v0.2.0](https://github.com/FEAT-ML/scengen/releases/tag/v0.2.0) (2024-04-09)
 ## Changed:
 * **Breaking**: upgraded dependency to `amirispy>=2.0`, [#47](https://github.com/FEAT-ML/scengen/issues/47)
 
