@@ -2,9 +2,10 @@
 
 SPDX-License-Identifier: CC0-1.0 -->
 
-# Tba - v0.3.0 (Tba.)
+# Chanel - [v1.0.0](https://github.com/FEAT-ML/scengen/releases/tag/v1.0.0) (Tba.)
 ## Changed:
 * **Breaking**: Results are written to subfolders using the scenario name, [#49](https://github.com/FEAT-ML/scengen/issues/49)
+* `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
 # Barrier bar - [v0.2.0](https://github.com/FEAT-ML/scengen/releases/tag/v0.2.0) (2024-04-09)
 ## Changed:

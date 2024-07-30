@@ -1,0 +1,58 @@
+# SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
+#
+# SPDX-License-Identifier: Apache-2.0
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "scengen"
+version = "1.0.0"
+description = "Scenario generator for the open electricity market model AMIRIS"
+license = "Apache-2.0"
+authors = [
+    "Felix Nitsch <amiris@dlr.de>",
+    "Ulrich Frey <amiris@dlr.de>",
+    "Christoph Schimeczek <amiris@dlr.de>",
+]
+maintainers = [
+    "Felix Nitsch <amiris@dlr.de>",
+]
+readme = "README.md"
+homepage = "https://gitlab.com/dlr-ve/esy/amiris/"
+repository = "https://github.com/FEAT-ML/scengen"
+keywords = [
+    "scenario",
+    "generator",
+    "AMIRIS",
+    "agent-based modelling",
+    "electricity market",
+    "simulation",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+]
+packages = [{ include = "scengen"}]
+include = ["CHANGELOG.md"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+amirispy = ">= 2.1, <3.0"
+pandas = ">= 2.0, <3.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.1"
+black = "^23.10"
+
+[tool.poetry.scripts]
+scengen = "scengen:main"
+
+[tool.black]
+line-length = 120
