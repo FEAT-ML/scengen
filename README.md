@@ -15,7 +15,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 In order to execute `scengen` correctly, you also require a Java Development Kit (JDK).
 JDK must be installed and accessible via your console in which you run `scengen`. 
 
-To test, run `java -version` which should show your JDK version (required: 8 or above).
+To test, run `java -version` which should show your JDK version (required: 11 or above).
 If `java` command is not found or relates to a Java Runtime Environment (JRE), please download and install JDK (e.g. from [Adoptium](https://adoptium.net/de/temurin/releases/?version=11))
 
 
