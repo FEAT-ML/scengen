@@ -86,9 +86,7 @@ def generation_capacity_available(scenario: dict) -> bool:
 
 def estimate_scenario(options: dict) -> bool:
     """Returns True if scenario passes all individual checks"""
+    logging.debug("Calling estimator")
     scenario = load_yaml(options["scenario_path"])
-
-    checks = []
-    checks.append(generation_capacity_available(scenario))
-
+    checks = [generation_capacity_available(scenario)]
     return all(checks)

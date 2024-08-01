@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from scengen.misc import check_if_valid_yaml_path
+from scengen.files import check_if_valid_yaml_path
 
 
 class Test:

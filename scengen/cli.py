@@ -24,11 +24,11 @@ CREATE_JAR_HELP = "Path to 'amiris-core_<version>-jar-with-dependencies.jar'"
 CREATE_DIR_HELP = "Directory to parse scenarios from and write results to"
 CREATE_SKIP_ESTIMATION_HELP = (
     "Speed-focused approach by omitting the AMIRIS scenario estimation at the expense "
-    "of bypassing plausibility check (Default: False)"
+    "of bypassing plausibility check (default: False)"
 )
 CREATE_SKIP_EVALUATION_HELP = (
     "Speed-focused approach by omitting the AMIRIS result evaluation at the expense "
-    "of bypassing plausibility check (Default: False)"
+    "of bypassing plausibility check (default: False)"
 )
 CREATE_OUTPUT_OPTION_HELP = (
     "optional pass through of FAME-Io's output conversion options, see "
@@ -38,20 +38,17 @@ CREATE_OUTPUT_OPTION_HELP = (
 
 class GeneralOptions(Enum):
     """Specifies general options for scengen"""
-
     LOG = auto()
     LOGFILE = auto()
 
 
 class Command(Enum):
     """Specifies command to execute"""
-
     CREATE = auto()
 
 
 class CreateOptions(Enum):
     """Options for command `create`"""
-
     NUMBER = auto()
     CONFIG = auto()
     JAR = auto()

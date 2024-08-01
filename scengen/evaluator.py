@@ -17,9 +17,8 @@ THRESHOLD_SHARE_SCARCITY_HOURS = 0.10
 
 def evaluate_scenario(options: dict) -> bool:
     """Returns True if results pass all individual checks"""
-    checks = []
-    checks.append(scarcity_occurrence(options))
-
+    logging.debug("Calling evaluator")
+    checks = [scarcity_occurrence(options)]
     return all(checks)
 
 

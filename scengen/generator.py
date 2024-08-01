@@ -13,7 +13,7 @@ from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical
-from scengen.misc import write_yaml, save_seed_to_trace_file
+from scengen.files import write_yaml, save_seed_to_trace_file
 
 SEPARATOR = ";"
 RANGE_IDENTIFIER = "range"
@@ -34,6 +34,7 @@ DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 
 def generate_scenario(options: dict) -> None:
     """Generates a new scenario based on `options` and `scenario_name` stored in `CreateOptions.DIRECTORY`"""
+    logging.debug("Generating scenario")
     config = load_yaml(options[CreateOptions.CONFIG])
 
     cwd = os.getcwd()
