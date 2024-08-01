@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: CC0-1.0 -->
 
-# Chanel - [v1.0.0](https://github.com/FEAT-ML/scengen/releases/tag/v1.0.0) (Tba.)
+# Channel - [v1.0.0](https://github.com/FEAT-ML/scengen/releases/tag/v1.0.0) (Tba.)
 ## Changed:
 * **Breaking**: Results are written to subfolders using the scenario name, [#49](https://github.com/FEAT-ML/scengen/issues/49)
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
