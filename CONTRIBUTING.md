@@ -53,7 +53,7 @@ Please follow the [PEP-8](https://peps.python.org/pep-0008/) style guide for Pyt
 Please follow [Google's](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings) conventions for docstrings.
 
 #### Release Name Theme
-We use landforms of [this list](https://en.wikipedia.org/wiki/Glossary_of_landforms). 
+We use landforms of [this list](https://en.wikipedia.org/wiki/Glossary_of_landforms#Landforms,_alphabetic). 
 
 ### Before submitting
 Please, check the following points before submitting a pull request:
