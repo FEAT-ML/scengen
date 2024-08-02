@@ -52,7 +52,7 @@ def generate_scenario(options: dict) -> None:
     if "create" in config:
         for agent in config["create"]:
             type_template = load_yaml(Path(agent["type_template"]))
-            agent_type_template = type_template["Agents"]
+            agent_type_template = type_template["Agent"]
             contract_type_template = type_template.get("Contracts")
             n_to_create = round(_get_value_from_field(agent["count"], options, allow_negative=False))
             agent_name = agent["this_agent"]
