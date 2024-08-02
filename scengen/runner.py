@@ -17,6 +17,7 @@ NAME_SCENARIO_YAML = "scenario.yaml"
 
 def execute_scenario(options: dict) -> None:
     """Calls AMIRIS after mapping `options` using amirispy functionality"""
+    logging.debug("Executing scenario")
     options = map_options(options)
     amiris.run_amiris(options)
     delete_pb_files()

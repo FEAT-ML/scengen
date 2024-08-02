@@ -4,27 +4,27 @@ from typing import List, Union, Tuple
 import pytest
 
 from scengen.generator import (
-    validate_input_range,
-    append_unique_integer_id,
-    create_new_unique_id,
-    replace_in_dict,
-    get_all_ids_from,
-    get_random_seed,
-    digest_range,
-    extract_numbers_from_string,
-    get_agent_id,
-    cast_numeric_strings,
+    _validate_input_range,
+    _append_unique_integer_id,
+    _create_new_unique_id,
+    _replace_in_dict,
+    _get_all_ids_from,
+    _get_random_seed,
+    _digest_range,
+    _extract_numbers_from_string,
+    _get_agent_id,
+    _cast_numeric_strings,
 )
 
 
 class Test:
     @pytest.mark.parametrize("values", [(10, 20), (1, 2), (1, 11111111111), (0, 3)])
     def test_validate_input_range__valid(self, values: Tuple[int, int]):
-        validate_input_range(values, allow_negative=False)
+        _validate_input_range(values, allow_negative=False)
 
     @pytest.mark.parametrize("values", [(-10, 0), (-2, 1), (-0, 11111111111)])
     def test_validate_input_range__valid(self, values: Tuple[int, int]):
-        validate_input_range(values, allow_negative=True)
+        _validate_input_range(values, allow_negative=True)
 
     @pytest.mark.parametrize(
         "values",
@@ -32,7 +32,7 @@ class Test:
     )
     def test_validate_input_range__invalid_type(self, values):
         with pytest.raises(Exception):
-            validate_input_range(values, allow_negative=False)
+            _validate_input_range(values, allow_negative=False)
 
     @pytest.mark.parametrize(
         "unique_list, new_id, expected",
@@ -44,7 +44,7 @@ class Test:
         ],
     )
     def test_append_unique_integer_id(self, unique_list: List[int], new_id: Union[str, int], expected: List[int]):
-        append_unique_integer_id(new_id, unique_list)
+        _append_unique_integer_id(new_id, unique_list)
         assert unique_list == expected
 
     @pytest.mark.parametrize(
@@ -56,7 +56,7 @@ class Test:
         ],
     )
     def test_create_new_unique_id(self, unique_list: List[int], expected: int):
-        new_id = create_new_unique_id(unique_list)
+        new_id = _create_new_unique_id(unique_list)
         assert new_id == expected
 
     @pytest.mark.parametrize(
@@ -69,7 +69,7 @@ class Test:
     def test_replace_in_dict(
         self, contracts: List[dict], replace_identifier: str, replace_v: str, expected: List[dict]
     ):
-        replace_in_dict(contracts, replace_identifier, replace_v)
+        _replace_in_dict(contracts, replace_identifier, replace_v)
         assert contracts == expected
 
     @pytest.mark.parametrize(
@@ -89,11 +89,11 @@ class Test:
         ],
     )
     def test_get_all_ids_from(self, scenario: dict, expected: list[int]):
-        assert get_all_ids_from(scenario) == expected
+        assert _get_all_ids_from(scenario) == expected
 
     @pytest.mark.parametrize("defaults, expected", [({"seed": 42}, 42)])
     def test_get_random_seed__override_default(self, defaults, expected):
-        seed = get_random_seed(defaults)
+        seed = _get_random_seed(defaults)
         assert seed == expected
 
     @pytest.mark.parametrize(
@@ -103,21 +103,21 @@ class Test:
         ],
     )
     def test_get_random_seed__default(self, defaults):
-        seed = get_random_seed(defaults)
+        seed = _get_random_seed(defaults)
         assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
 
     @pytest.mark.parametrize("values, expected", [("range(0; 4)", (0, 4)), ("RaNGE(-10; 30)", (-10, 30))])
     def test_digest_range__valid_input(self, values, expected):
-        assert digest_range(values) == expected
+        assert _digest_range(values) == expected
 
     @pytest.mark.parametrize("values", [("rnge(0; 4)"), ("range[10; 30]")])
     def test_digest_range__invalid_input(self, values):
         with pytest.raises(Exception):
-            digest_range(values)
+            _digest_range(values)
 
     @pytest.mark.parametrize("values, expected", [("range(0, 4)", "0, 4"), ("RaNgE(1, 23", "1, 23")])
     def test_extract_numbers_from_string(self, values, expected):
-        assert extract_numbers_from_string(values) == expected
+        assert _extract_numbers_from_string(values) == expected
 
     @pytest.mark.parametrize(
         "name, agent_n, total_n, expected",
@@ -128,7 +128,7 @@ class Test:
         ],
     )
     def test_get_agent_id(self, name, agent_n, total_n, expected):
-        assert get_agent_id(name, agent_n, total_n) == expected
+        assert _get_agent_id(name, agent_n, total_n) == expected
 
     @pytest.mark.parametrize(
         "values, expected",
@@ -139,4 +139,4 @@ class Test:
         ],
     )
     def test_cast_numeric_strings(self, values, expected):
-        assert cast_numeric_strings(values) == expected
+        assert _cast_numeric_strings(values) == expected
