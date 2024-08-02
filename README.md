@@ -49,7 +49,7 @@ You have four main options to define input to agents attributes:
 1. use a **fixed** value, e.g. `DemandSeries: timeseries/demand/load.csv`
 2. use a **random draw** of **dedicated options** (separated by `;`) with keyword `choose`, e.g. `DemandSeries: choose("timeseries/demand/load1.csv"; timeseries/demand/load2.csv; 1000)`
 3. use a **random file** from a **directory** with keyword `pickfile`, e.g. `DemandSeries: pickfile(timeseries/demand)`
-4. use a **random draw** in a **range** (exactly two values separated by `;`) with keyword `range`, e.g. `DemandSeries: range(1000; 1300)`
+4. use a **random draw** in a **range** (exactly two values separated by `;`) with keyword `range_int` (integer) or `range_float` (floats), e.g. `DemandSeries: rangeInt(1000; 1300)`
 
 These can also be applied to all other fields in the `base_template` file.
 See also the exemplary files in section `Relevant Files`.
@@ -79,7 +79,7 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
     count: choose(1; 3)  # use fixed value
-    # count: range(1; 3)  # use a random draw between range (here: 1 as minimum and 3 as maximum)
+    # count: range_int(1; 3)  # use a random draw in range (here: 1 as minimum and 3 as maximum)
     # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
     this_agent: "demandTraderDE" # link to other dynamically created agents by name
     external_ids: 
@@ -113,7 +113,9 @@ Agent:
       - ValueOfLostLoad: 8888.0
         DemandSeries: pickfile(timeseries/demand)  # use random file from directory
       - ValueOfLostLoad: 7777.0
-        DemandSeries: range(1000; 1300)  # use a random draw between range (here: 1000 as minimum and 1300 as maximum)
+        DemandSeries: range_int(1000; 1300)  # use a random draw of integers in range (here: 1000 as minimum and 1300 as maximum)
+      - ValueOfLostLoad: 7777.0
+        DemandSeries: range_float(3.14; 42.42)  # use a random draw of floats in range (here: 3.14 as minimum and 42.42 as maximum)
         
 Contracts:
   - SenderId: //exchange  # external agent

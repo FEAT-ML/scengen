@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
+# SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
 import copy
@@ -15,8 +15,12 @@ from scengen.cli import CreateOptions
 from scengen.files import write_yaml, save_seed_to_trace_file
 from scengen.logs import log_and_raise_critical
 
+numeric = Union[int, float]
+
 SEPARATOR = ";"
-RANGE_IDENTIFIER = "range"
+RANGE_INT_IDENTIFIER = "range_int"
+RANGE_FLOAT_IDENTIFIER = "range_float"
+RANGE_IDENTIFIER_DEPRECATED = "range("
 CHOOSE_IDENTIFIER = "choose"
 PICKFILE_IDENTIFIER = "pickfile"
 
@@ -28,7 +32,9 @@ ERR_INVALID_RANGE_INPUT = (
     "'range(minimum_integer, maximum_integer)'. Negative integers are considered {}"
 )
 ERR_INVALID_RANGE_ORDER = "Received invalid range input in form '{}'. First value must be larger equal to second value."
-
+ERR_DEPRECATED_RANGE_IDENTIFIER = "Found deprecated identifier in '{}'. Please use '{}' or '{}' instead."
+WARN_ROUNDED_NUMBER_OF_AGENTS = "Rounded `agent_count` to '{}'. Make sure you provide a single integer or '{}' instead of '{}'."
+ERR_NO_INTEGER = "Expected a single integer or '{}' but received '{}' for `agent_count` instead."
 ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
 ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
@@ -54,7 +60,7 @@ def generate_scenario(options: dict) -> None:
             type_template = load_yaml(Path(agent["type_template"]))
             agent_type_template = type_template["Agent"]
             contract_type_template = type_template.get("Contracts")
-            n_to_create = round(_get_value_from_field(agent["count"], options, allow_negative=False))
+            n_to_create = _get_number_of_agents_to_create(agent["count"], options)
             agent_name = agent["this_agent"]
             external_ids = agent.get("external_ids")
 
@@ -77,6 +83,22 @@ def generate_scenario(options: dict) -> None:
     write_yaml(scenario, options["scenario_path"])
 
 
+def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options: dict) -> int:
+    """
+    Returns an integer number from field `agent_count`
+    Accepts float values by rounding to integer, but raises warning to notify user about wrong type, in all other cases an Error is raised
+    """
+    value_from_field = _get_value_from_field(agent_count, options, allow_negative=False)
+    if not isinstance(value_from_field, int):
+        try:
+            rounded_number = round(value_from_field)
+            logging.warning(WARN_ROUNDED_NUMBER_OF_AGENTS.format(rounded_number, RANGE_INT_IDENTIFIER, agent_count))
+            value_from_field = rounded_number
+        except TypeError:
+            log_and_raise_critical(ERR_NO_INTEGER.format(RANGE_INT_IDENTIFIER, agent_count))
+    return value_from_field
+
+
 def _set_random_seed(defaults: dict, options: dict, trace_file: dict) -> None:
     """Sets random seed if not yet saved to `options['random_seed']`"""
     if not options.get("random_seed"):
@@ -97,17 +119,23 @@ def _get_random_seed(defaults: dict) -> int:
 
 def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, allow_negative: bool = True) -> Any:
     """
-    Returns value stored in `input_value` based on the user specification 'RANGE_IDENTIFIER', 'CHOOSE_IDENTIFIER',
-    'PICKFILE_IDENTIFIER' or else just `input_value`.
-    In option `RANGE_IDENTIFIER`, `allow_negative` is True as default but can limit allowed range to values >=0.
+    Returns value stored in `input_value` based on the user specification 'RANGE_INT_IDENTIFIER',
+    'RANGE_INT_IDENTIFIER', 'CHOOSE_IDENTIFIER', 'PICKFILE_IDENTIFIER' or else just `input_value`.
+    In range options, `allow_negative` is True as default but can limit allowed range to values >=0.
     In option `PICKFILE_IDENTIFIER`, `options[CreateOptions.DIRECTORY]` is used to get files: paths relative to scenario
     """
     if isinstance(input_value, str):
-        if RANGE_IDENTIFIER in input_value.lower():
-            input_range = _digest_range(input_value)
+        if RANGE_IDENTIFIER_DEPRECATED in input_value.lower():
+            log_and_raise_critical(ERR_DEPRECATED_RANGE_IDENTIFIER.format(input_value, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER))
+        elif RANGE_INT_IDENTIFIER in input_value.lower():
+            input_range = _digest_int_range(input_value)
             _validate_input_range(input_range, allow_negative)
-            minimum, maximum = input_range
-            value = random.uniform(minimum, maximum)
+            value = random.randint(*input_range)
+            logging.debug(f"Chose random value '{value}' from '{input_value}'.")
+        elif RANGE_FLOAT_IDENTIFIER in input_value.lower():
+            input_range = _digest_float_range(input_value)
+            _validate_input_range(input_range, allow_negative)
+            value = random.uniform(*input_range)
             logging.debug(f"Chose random value '{value}' from '{input_value}'.")
         elif CHOOSE_IDENTIFIER in input_value.lower():
             to_choose = _digest_choose(input_value)
@@ -126,23 +154,33 @@ def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, all
     return value
 
 
-def _digest_range(input_value: str) -> Tuple[int, int]:
+def _digest_int_range(input_value: str) -> Tuple[int, int]:
     """Returns Tuple of minimum and maximum integer value digested from `input_value` in expected form"""
-    numbers = _extract_numbers_from_string(input_value)
+    numbers = _extract_numbers_from_string(input_value, RANGE_INT_IDENTIFIER)
     try:
-        min_value, max_value = map(float, numbers.split(SEPARATOR))
+        min_value, max_value = map(int, numbers.split(SEPARATOR))
+        return min_value, max_value
     except ValueError:
         log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
-    return min_value, max_value
 
 
-def _extract_numbers_from_string(input_value: str) -> str:
-    """Returns string in form 'int, int' from given `input_value` by removing RANGE_IDENTIFIER and '(' and ')'"""
-    extracted_numbers = input_value.lower().replace(RANGE_IDENTIFIER, "").replace("(", "").replace(")", "")
+def _digest_float_range(input_value: str) -> Tuple[float, float]:
+    """Returns Tuple of minimum and maximum float value digested from `input_value` in expected form"""
+    numbers = _extract_numbers_from_string(input_value, RANGE_FLOAT_IDENTIFIER)
+    try:
+        min_value, max_value = map(float, numbers.split(SEPARATOR))
+        return min_value, max_value
+    except ValueError:
+        log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
+
+
+def _extract_numbers_from_string(input_value: str, identifier: str) -> str:
+    """Returns string in form 'value, value' from given `input_value` by removing `identifier` and '(' and ')'"""
+    extracted_numbers = input_value.lower().replace(identifier, "").replace("(", "").replace(")", "")
     return extracted_numbers
 
 
-def _validate_input_range(input_range: Tuple[int, int], allow_negative: bool) -> None:
+def _validate_input_range(input_range: Tuple[numeric, numeric], allow_negative: bool) -> None:
     """
     Raises Exception if input range is no int or float or list of [minimum, maximum], and
     values >= 0 (if `allow_negative` = False)
