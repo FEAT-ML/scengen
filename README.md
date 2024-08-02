@@ -98,7 +98,7 @@ The section `Agent` describes the Attributes of one particular Agent type which 
 The Agent ID is created by `scengen` directly. 
 
 Optionally, linked `Contracts` are defined in the other section of the file.
-With the reserved key `//THISAGENT`, you link to this particular Agent to be created, whereas all other tags with 
+With the reserved key `//THIS_AGENT`, you link to this particular Agent to be created, whereas all other tags with 
 prefix `//` link to the particular agent in the `configuration` YAML under section `external_ids`.
 
 ```yaml
@@ -117,19 +117,19 @@ Agent:
         
 Contracts:
   - SenderId: //exchange  # external agent
-    ReceiverId: //THISAGENT  # is referring to this particular agent
+    ReceiverId: //THIS_AGENT  # is referring to this particular agent
     ProductName: GateClosureInfo
     FirstDeliveryTime: -10
     DeliveryIntervalInSteps: 3600
 
-  - SenderId: //THISAGENT
+  - SenderId: //THIS_AGENT
     ReceiverId: //exchange
     ProductName: Bids
     FirstDeliveryTime: 0
     DeliveryIntervalInSteps: 3600
 
   - SenderId: //exchange
-    ReceiverId: //THISAGENT
+    ReceiverId: //THIS_AGENT
     ProductName: Awards
     FirstDeliveryTime: 4
     DeliveryIntervalInSteps: 3600
