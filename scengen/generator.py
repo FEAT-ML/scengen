@@ -29,7 +29,8 @@ KEY_THIS_AGENT = f"{REPLACEMENT_IDENTIFIER}THIS_AGENT"
 
 ERR_INVALID_RANGE_INPUT = (
     "Received invalid range input in form '{}'. Please provide in format "
-    "'range(minimum_integer, maximum_integer)'. Negative integers are considered {}"
+    f"'{RANGE_INT_IDENTIFIER}(minimum_integer, maximum_integer)' or '{RANGE_FLOAT_IDENTIFIER}(minimum_float, maximum_float)'. "
+    "Negative integers are considered {}"
 )
 ERR_INVALID_RANGE_ORDER = "Received invalid range input in form '{}'. First value must be larger equal to second value."
 ERR_DEPRECATED_RANGE_IDENTIFIER = "Found deprecated identifier in '{}'. Please use '{}' or '{}' instead."
