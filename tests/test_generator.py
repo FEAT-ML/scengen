@@ -10,10 +10,10 @@ from scengen.generator import (
     _replace_in_dict,
     _get_all_ids_from,
     _get_random_seed,
-    _digest_range,
+    _digest_int_range,
     _extract_numbers_from_string,
     _get_agent_id,
-    _cast_numeric_strings,
+    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range,
 )
 
 
@@ -106,18 +106,31 @@ class Test:
         seed = _get_random_seed(defaults)
         assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
 
-    @pytest.mark.parametrize("values, expected", [("range(0; 4)", (0, 4)), ("RaNGE(-10; 30)", (-10, 30))])
-    def test_digest_range__valid_input(self, values, expected):
-        assert _digest_range(values) == expected
+    @pytest.mark.parametrize("values, expected", [("range_int(0; 4)", (0, 4)), ("RaNGE_inT(-10; 30)", (-10, 30))])
+    def test_digest_int_range__valid_input(self, values, expected):
+        assert _digest_int_range(values) == expected
 
-    @pytest.mark.parametrize("values", [("rnge(0; 4)"), ("range[10; 30]")])
-    def test_digest_range__invalid_input(self, values):
+    @pytest.mark.parametrize("values, expected", [("range_float(0; 4.2)", (0, 4.2)), ("RaNGE_float(-10.999; 30.1)", (-10.999, 30.1))])
+    def test_digest_float_range__valid_input(self, values, expected):
+        assert _digest_float_range(values) == expected
+
+    @pytest.mark.parametrize("values", [("rnge_int(0; 4)"), ("range_int[10; 30]")])
+    def test_digest_int_range__invalid_input(self, values):
         with pytest.raises(Exception):
-            _digest_range(values)
+            _digest_int_range(values)
 
-    @pytest.mark.parametrize("values, expected", [("range(0, 4)", "0, 4"), ("RaNgE(1, 23", "1, 23")])
-    def test_extract_numbers_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values) == expected
+    @pytest.mark.parametrize("values", [("rnge_float(0.1; 4.2)"), ("range_float[10.2; 30.4]")])
+    def test_digest_float_range__invalid_input(self, values):
+        with pytest.raises(Exception):
+            _digest_float_range(values)
+
+    @pytest.mark.parametrize("values, expected", [("range_int(0, 4)", "0, 4"), ("RaNgE_int(1, 23", "1, 23")])
+    def test_extract_ints_from_string(self, values, expected):
+        assert _extract_numbers_from_string(values, RANGE_INT_IDENTIFIER) == expected
+
+    @pytest.mark.parametrize("values, expected", [("range_float(0, 4.0)", "0, 4.0"), ("RaNgE_FlOAT(1.2, 23.2", "1.2, 23.2")])
+    def test_extract_floats_from_string(self, values, expected):
+        assert _extract_numbers_from_string(values, RANGE_FLOAT_IDENTIFIER) == expected
 
     @pytest.mark.parametrize(
         "name, agent_n, total_n, expected",
