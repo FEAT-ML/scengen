@@ -92,9 +92,9 @@ create:  # list of agents to create
 ```
 
 ##### `type_template` YAML
-This file consists of two parts.
+This file consists of two parts, namely `Agent` and `Contracts`.
 
-First, it describes the Attributes of an Agent which shall be dynamically created in `Agents`.
+The section `Agent` describes the Attributes of one particular Agent type which shall be dynamically created and added to the `base_template`.
 The Agent ID is created by `scengen` directly. 
 
 Optionally, linked `Contracts` are defined in the other section of the file.
@@ -102,7 +102,7 @@ With the reserved key `//THISAGENT`, you link to this particular Agent to be cre
 prefix `//` link to the particular agent in the `configuration` YAML under section `external_ids`.
 
 ```yaml
-Agents:
+Agent:
   Type: DemandTrader
   Attributes:
     Loads:
