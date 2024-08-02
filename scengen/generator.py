@@ -87,7 +87,7 @@ def generate_scenario(options: dict) -> None:
 def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options: dict) -> int:
     """
     Returns an integer number from field `agent_count`
-    Accepts float values by rounding to integer, but raises warning to notify user about wrong type, in all other cases an Error is raised
+    Accepts float values by rounding to integer, but raises warning to notify user about wrong type, for any other data type an Error is raised
     """
     value_from_field = _get_value_from_field(agent_count, options, allow_negative=False)
     if not isinstance(value_from_field, int):
