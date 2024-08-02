@@ -49,7 +49,7 @@ You have four main options to define input to agents attributes:
 1. use a **fixed** value, e.g. `DemandSeries: timeseries/demand/load.csv`
 2. use a **random draw** of **dedicated options** (separated by `;`) with keyword `choose`, e.g. `DemandSeries: choose("timeseries/demand/load1.csv"; timeseries/demand/load2.csv; 1000)`
 3. use a **random file** from a **directory** with keyword `pickfile`, e.g. `DemandSeries: pickfile(timeseries/demand)`
-4. use a **random draw** in a **range** (exactly two values separated by `;`) with keyword `range_int` (integer) or `range_float` (floats), e.g. `DemandSeries: rangeInt(1000; 1300)`
+4. use a **random draw** in a **range** (exactly two values separated by `;`) with keyword `range_int` (integer) or `range_float` (floats), e.g. `DemandSeries: range_int(1000; 1300)`
 
 These can also be applied to all other fields in the `base_template` file.
 See also the exemplary files in section `Relevant Files`.
