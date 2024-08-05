@@ -11,7 +11,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
 ## Added:
-* New trace file is generated and written to disk if not defined in GeneratorConfig, [#53](https://github.com/FEAT-ML/scengen/issues/53)
+* New `trace_file` is generated and written to disk if not defined in `GeneratorConfig` or if not found in provided path, [#53](https://github.com/FEAT-ML/scengen/issues/53)
 
 # [v0.2.0](https://github.com/FEAT-ML/scengen/releases/tag/v0.2.0) 2024-04-09 - Barrier bar
 ## Changed:

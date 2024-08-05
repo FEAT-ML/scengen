@@ -53,7 +53,7 @@ def save_seed_to_trace_file(options: dict, seed: int) -> None:
     trace_file["seed"] = seed
     write_dict_to_disk(trace_file, trace_file_name)
     os.chdir(cwd)
-    logging.debug(f"Stored seed '{seed}' to tracefile")
+    logging.debug(f"Stored seed '{seed}' to `trace_file`")
 
 
 def write_yaml(output_file: dict, output_file_path: Path) -> None:
@@ -94,23 +94,33 @@ def ensure_folder_exists(path: Path) -> None:
 
 
 def get_trace_file(config: dict, options: dict) -> dict:
-    """Returns loaded `defaults["trace_file"]` or adds new trace file if not present"""
+    """Returns loaded `defaults["trace_file"]` or creates new trace file if not present"""
     defaults = config["defaults"]
     if defaults.get("trace_file"):
-        trace_file = load_yaml(defaults["trace_file"])
+        trace_file_path = defaults["trace_file"]
+        try:
+            trace_file = load_yaml(trace_file_path)
+        except FileNotFoundError:
+            trace_file = setup_new_trace_file(config, defaults, options, trace_file_path)
+            logging.info(f"Could not find `trace_file` in path '{trace_file_path}' as specified in GeneratorConfig. Created new one instead.")
     else:
-        trace_file = {
-            "total_count": 0,
-            "seed": 0
-        }
         trace_file_name = f"trace_file_{time.strftime('%Y-%m-%d_%H%M%S')}.yaml"
-        defaults["trace_file"] = trace_file_name
+        trace_file = setup_new_trace_file(config, defaults, options, trace_file_name)
+        logging.warning(f"No mandatory `trace_file` found in given GeneratorConfig. Created new one at '{trace_file_name}' and added to GeneratorConfig instead.")
+    return trace_file
 
-        cwd = os.getcwd()
-        os.chdir(Path(options[CreateOptions.CONFIG]).parent)
-        write_dict_to_disk(config, options[CreateOptions.CONFIG])
-        write_dict_to_disk(trace_file, trace_file_name)
-        os.chdir(cwd)
 
-        logging.debug(f"No `trace_file` found in given Generator Config. Created new one and added to Config instead.")
+def setup_new_trace_file(config: dict, defaults: dict, options: dict, file_name: str) -> dict:
+    """Returns new trace_file which is added to config and saved to disk with `file_name`"""
+    trace_file = {
+        "total_count": 0,
+        "seed": 0
+    }
+
+    defaults["trace_file"] = file_name
+    cwd = os.getcwd()
+    os.chdir(Path(options[CreateOptions.CONFIG]).parent)
+    write_dict_to_disk(config, options[CreateOptions.CONFIG])
+    write_dict_to_disk(trace_file, file_name)
+    os.chdir(cwd)
     return trace_file
