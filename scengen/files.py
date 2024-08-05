@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
+import time
 
 import yaml
 from fameio.source.loader import load_yaml
@@ -31,10 +32,15 @@ def increase_count_in_trace_file(options: dict) -> None:
     trace_file_name = config["defaults"]["trace_file"]
     trace_file = load_yaml(trace_file_name)
     trace_file["total_count"] += 1
-    with open(trace_file_name, "w") as file:
-        yaml.dump(trace_file, file, default_flow_style=False)
+    write_dict_to_disk(trace_file, trace_file_name)
     os.chdir(cwd)
     logging.debug(f"Increased trace file count to '{trace_file['total_count']}'")
+
+
+def write_dict_to_disk(trace_file: dict, file_name: str) -> None:
+    """Writes `trace_file` as `file_name` to disk"""
+    with open(file_name, "w") as file:
+        yaml.dump(trace_file, file, default_flow_style=False)
 
 
 def save_seed_to_trace_file(options: dict, seed: int) -> None:
@@ -45,8 +51,7 @@ def save_seed_to_trace_file(options: dict, seed: int) -> None:
     trace_file_name = config["defaults"]["trace_file"]
     trace_file = load_yaml(trace_file_name)
     trace_file["seed"] = seed
-    with open(trace_file_name, "w") as file:
-        yaml.dump(trace_file, file, default_flow_style=False)
+    write_dict_to_disk(trace_file, trace_file_name)
     os.chdir(cwd)
     logging.debug(f"Stored seed '{seed}' to tracefile")
 
@@ -86,3 +91,26 @@ def ensure_folder_exists(path: Path) -> None:
         log_error_and_raise(ValueError(_ERR_NOT_A_FOLDER.format(path)))
     if not path.is_dir():
         path.mkdir(parents=True)
+
+
+def get_trace_file(config: dict, options: dict) -> dict:
+    """Returns loaded `defaults["trace_file"]` or adds new trace file if not present"""
+    defaults = config["defaults"]
+    if defaults.get("trace_file"):
+        trace_file = load_yaml(defaults["trace_file"])
+    else:
+        trace_file = {
+            "total_count": 0,
+            "seed": 0
+        }
+        trace_file_name = f"trace_file_{time.strftime('%Y-%m-%d_%H%M%S')}.yaml"
+        defaults["trace_file"] = trace_file_name
+
+        cwd = os.getcwd()
+        os.chdir(Path(options[CreateOptions.CONFIG]).parent)
+        write_dict_to_disk(config, options[CreateOptions.CONFIG])
+        write_dict_to_disk(trace_file, trace_file_name)
+        os.chdir(cwd)
+
+        logging.debug(f"No `trace_file` found in given Generator Config. Created new one and added to Config instead.")
+    return trace_file

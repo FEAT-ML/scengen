@@ -142,6 +142,9 @@ The `trace_file` is specified as relative path in the `generation` file.
 Its purpose is to keep track of all created scenario configurations, which ensures that no duplicates are generated.
 The `total_count` gets increased by 1, if the generated scenario passed all stages in the workflow (estimation and evaluation).
 
+If no such file is defined in the `GeneratorConfig`, a Warning is raised and a new file with file name 
+`trace_file_'%Y-%m-%d_%H%M%S'.yaml` is written to disk.
+
 Its format is as follows:
 
 ```yaml
