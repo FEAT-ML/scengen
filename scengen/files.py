@@ -121,6 +121,7 @@ def setup_new_trace_file(config: dict, defaults: dict, options: dict, file_name:
     cwd = os.getcwd()
     os.chdir(Path(options[CreateOptions.CONFIG]).parent)
     write_dict_to_disk(config, options[CreateOptions.CONFIG])
+    ensure_folder_exists(Path(file_name).parent)
     write_dict_to_disk(trace_file, file_name)
     os.chdir(cwd)
     return trace_file
