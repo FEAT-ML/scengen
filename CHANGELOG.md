@@ -8,6 +8,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * **Breaking**: Replaced general `range` option with specific `range_int` and `range_float` options, [#56](https://github.com/FEAT-ML/scengen/issues/56)
 * **Breaking**: Renamed section `Agents` to `Agent` in `TypeTemplate` to clarify that one agent type per template is expected, [#58](https://github.com/FEAT-ML/scengen/issues/58)
 * **Breaking**: Renamed replacement identifier from `//THISAGENT` to `//THIS_AGENT` for better readability, [#60](https://github.com/FEAT-ML/scengen/issues/60)
+* Update to new logging implementation allowing more flexible and consistent use of logging, [#55](https://github.com/FEAT-ML/scengen/issues/55)
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
 ## Added:

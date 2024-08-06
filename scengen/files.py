@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-import logging
 import os
 import shutil
 from pathlib import Path
@@ -11,7 +10,7 @@ import yaml
 from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
-from scengen.logs import log_and_raise_critical, log_error_and_raise
+from scengen.logs import log_and_raise_critical, log_error_and_raise, log
 
 _ERR_NOT_A_FOLDER = "Given Path '{}' is not a directory."
 _INFO_NO_TRAC_FILE_FOUND = ("Could not find `trace_file` in path '{}' as specified in GeneratorConfig. "
@@ -25,20 +24,18 @@ def delete_all_files(options: dict):
     dir_to_remove = Path(options[CreateOptions.DIRECTORY], options["scenario_name"])
     shutil.rmtree(dir_to_remove, ignore_errors=True)
     os.remove(options["scenario_path"])
-    logging.debug(f"Removed all files in '{dir_to_remove}'")
+    log().debug(f"Removed all files in '{dir_to_remove}'")
 
 
 def increase_count_in_trace_file(options: dict) -> None:
     """Increases count in trace file defined in `CreateOptions.CONFIG` by 1"""
     config = load_yaml(options[CreateOptions.CONFIG])
-    cwd = os.getcwd()
-    os.chdir(Path(options[CreateOptions.CONFIG]).parent)
-    trace_file_name = config["defaults"]["trace_file"]
-    trace_file = load_yaml(trace_file_name)
+    base_path = Path(options[CreateOptions.CONFIG]).parent
+    full_path = Path(base_path, config["defaults"]["trace_file"])
+    trace_file = load_yaml(full_path)
     trace_file["total_count"] += 1
-    write_dict_to_disk(trace_file, trace_file_name)
-    os.chdir(cwd)
-    logging.debug(f"Increased trace file count to '{trace_file['total_count']}'")
+    write_dict_to_disk(trace_file, full_path)
+    log().debug(f"Increased trace file count to '{trace_file['total_count']}'")
 
 
 def write_dict_to_disk(trace_file: dict, file_name: Path) -> None:
@@ -50,14 +47,12 @@ def write_dict_to_disk(trace_file: dict, file_name: Path) -> None:
 def save_seed_to_trace_file(options: dict, seed: int) -> None:
     """Saves seed to trace file"""
     config = load_yaml(options[CreateOptions.CONFIG])
-    cwd = os.getcwd()
-    os.chdir(Path(options[CreateOptions.CONFIG]).parent)
-    trace_file_name = config["defaults"]["trace_file"]
-    trace_file = load_yaml(trace_file_name)
+    base_path = Path(options[CreateOptions.CONFIG]).parent
+    full_path = Path(base_path, config["defaults"]["trace_file"])
+    trace_file = load_yaml(full_path)
     trace_file["seed"] = seed
-    write_dict_to_disk(trace_file, trace_file_name)
-    os.chdir(cwd)
-    logging.debug(f"Stored seed '{seed}' to `trace_file`")
+    write_dict_to_disk(trace_file, full_path)
+    log().debug(f"Stored seed '{seed}' to `trace_file`")
 
 
 def write_yaml(output_file: dict, output_file_path: Path) -> None:
@@ -106,11 +101,11 @@ def get_trace_file(config: dict, options: dict) -> dict:
             trace_file = load_yaml(trace_file_path)
         except FileNotFoundError:
             trace_file = setup_new_trace_file(config, defaults, options, trace_file_path)
-            logging.info(_INFO_NO_TRAC_FILE_FOUND.format(trace_file_path))
+            log().info(_INFO_NO_TRAC_FILE_FOUND.format(trace_file_path))
     else:
         trace_file_name = f"trace_file_{time.strftime('%Y-%m-%d_%H%M%S')}.yaml"
         trace_file = setup_new_trace_file(config, defaults, options, trace_file_name)
-        logging.warning(_WARN_NO_TRACE_FILE_DEFINED.format(trace_file_name))
+        log().warning(_WARN_NO_TRACE_FILE_DEFINED.format(trace_file_name))
     return trace_file
 
 

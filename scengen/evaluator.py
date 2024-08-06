@@ -1,13 +1,12 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-
-import logging
 from pathlib import Path
 
 import pandas as pd
 from amirispy.source.cli import RunOptions
 
+from scengen.logs import log
 
 NAME_ENERGY_EXCHANGE = "DayAheadMarketSingleZone"
 NAME_ELECTRICITY_PRICE_COLUMN = "ElectricityPriceInEURperMWH"  # noqa
@@ -17,7 +16,7 @@ THRESHOLD_SHARE_SCARCITY_HOURS = 0.10
 
 def evaluate_scenario(options: dict) -> bool:
     """Returns True if results pass all individual checks"""
-    logging.debug("Calling evaluator")
+    log().debug("Calling evaluator")
     checks = [scarcity_occurrence(options)]
     return all(checks)
 
@@ -30,9 +29,7 @@ def scarcity_occurrence(options: dict) -> bool:
     n_of_tolerated_hours = round(len(energy_exchange) * THRESHOLD_SHARE_SCARCITY_HOURS)
     if scarcity_hours > n_of_tolerated_hours:
         decision = False
-        logging.warning(
-            f"Number of scarcity hours ({scarcity_hours}) exceeds toleration of {n_of_tolerated_hours} hours."
-        )
+        log().warning(f"Number of scarcity hours ({scarcity_hours}) exceeds tolerance of {n_of_tolerated_hours} hours.")
     else:
         decision = True
     return decision
