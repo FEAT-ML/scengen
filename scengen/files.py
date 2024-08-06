@@ -14,6 +14,10 @@ from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical, log_error_and_raise
 
 _ERR_NOT_A_FOLDER = "Given Path '{}' is not a directory."
+_INFO_NO_TRAC_FILE_FOUND = ("Could not find `trace_file` in path '{}' as specified in GeneratorConfig. "
+                            "Created new one instead.")
+_WARN_NO_TRACE_FILE_DEFINED = ("No mandatory `trace_file` found in given GeneratorConfig. Created new one at '{}' and "
+                               "added to GeneratorConfig instead.")
 
 
 def delete_all_files(options: dict):
@@ -102,11 +106,11 @@ def get_trace_file(config: dict, options: dict) -> dict:
             trace_file = load_yaml(trace_file_path)
         except FileNotFoundError:
             trace_file = setup_new_trace_file(config, defaults, options, trace_file_path)
-            logging.info(f"Could not find `trace_file` in path '{trace_file_path}' as specified in GeneratorConfig. Created new one instead.")
+            logging.info(_INFO_NO_TRAC_FILE_FOUND.format(trace_file_path))
     else:
         trace_file_name = f"trace_file_{time.strftime('%Y-%m-%d_%H%M%S')}.yaml"
         trace_file = setup_new_trace_file(config, defaults, options, trace_file_name)
-        logging.warning(f"No mandatory `trace_file` found in given GeneratorConfig. Created new one at '{trace_file_name}' and added to GeneratorConfig instead.")
+        logging.warning(_WARN_NO_TRACE_FILE_DEFINED.format(trace_file_name))
     return trace_file
 
 
