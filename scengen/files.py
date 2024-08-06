@@ -37,7 +37,7 @@ def increase_count_in_trace_file(options: dict) -> None:
     logging.debug(f"Increased trace file count to '{trace_file['total_count']}'")
 
 
-def write_dict_to_disk(trace_file: dict, file_name: str) -> None:
+def write_dict_to_disk(trace_file: dict, file_name: Path) -> None:
     """Writes `trace_file` as `file_name` to disk"""
     with open(file_name, "w") as file:
         yaml.dump(trace_file, file, default_flow_style=False)
@@ -114,14 +114,14 @@ def setup_new_trace_file(config: dict, defaults: dict, options: dict, file_name:
     """Returns new trace_file which is added to config and saved to disk with `file_name`"""
     trace_file = {
         "total_count": 0,
-        "seed": 0
+        "seed": 0,
     }
 
     defaults["trace_file"] = file_name
-    cwd = os.getcwd()
-    os.chdir(Path(options[CreateOptions.CONFIG]).parent)
     write_dict_to_disk(config, options[CreateOptions.CONFIG])
-    ensure_folder_exists(Path(file_name).parent)
-    write_dict_to_disk(trace_file, file_name)
-    os.chdir(cwd)
+
+    base_path = Path(options[CreateOptions.CONFIG]).parent
+    full_path = Path(base_path, file_name)
+    ensure_folder_exists(full_path.parent)
+    write_dict_to_disk(trace_file, full_path)
     return trace_file
