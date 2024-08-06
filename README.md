@@ -71,7 +71,7 @@ It has the following format with all paths relative to this particular file.
 ```yaml
 defaults:  # defaults used for scenario generation
   # seed: 42 # optional seed used for random number generation otherwise current system time in ns is used
-  trace_file: "./tracefile.yaml"  # file used to log created scenarios avoiding duplicates
+  trace_file: "./tracefile.yaml"  # mandatory file used to log created scenarios avoiding duplicates
   base_name: "Germany2019"  # first part of name created by generator; second part of name is unique identifier (number of all scenarios)
 
 base_template: "./template.yaml"  # link to template file containing at least Schema & GeneralProperties sections
@@ -138,9 +138,13 @@ Contracts:
 ```
 
 ##### `trace_file` YAML
-The `trace_file` is specified as relative path in the `generation` file. 
+The mandatory `trace_file` is specified as relative path in the `generation` file. 
 Its purpose is to keep track of all created scenario configurations, which ensures that no duplicates are generated.
 The `total_count` gets increased by 1, if the generated scenario passed all stages in the workflow (estimation and evaluation).
+
+If no such file is defined in the `GeneratorConfig`, a Warning is raised and a new file with file name 
+`trace_file_'%Y-%m-%d_%H%M%S'.yaml` is written to disk.
+If the file cannot be found in the specified path, a new `trace_file` is created using the specified file path.
 
 Its format is as follows:
 

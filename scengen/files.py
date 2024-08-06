@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 from pathlib import Path
+import time
 
 import yaml
 from fameio.source.loader import load_yaml
@@ -13,6 +14,10 @@ from scengen.cli import CreateOptions
 from scengen.logs import log_and_raise_critical, log_error_and_raise
 
 _ERR_NOT_A_FOLDER = "Given Path '{}' is not a directory."
+_INFO_NO_TRAC_FILE_FOUND = ("Could not find `trace_file` in path '{}' as specified in GeneratorConfig. "
+                            "Created new one instead.")
+_WARN_NO_TRACE_FILE_DEFINED = ("No mandatory `trace_file` found in given GeneratorConfig. Created new one at '{}' and "
+                               "added to GeneratorConfig instead.")
 
 
 def delete_all_files(options: dict):
@@ -31,10 +36,15 @@ def increase_count_in_trace_file(options: dict) -> None:
     trace_file_name = config["defaults"]["trace_file"]
     trace_file = load_yaml(trace_file_name)
     trace_file["total_count"] += 1
-    with open(trace_file_name, "w") as file:
-        yaml.dump(trace_file, file, default_flow_style=False)
+    write_dict_to_disk(trace_file, trace_file_name)
     os.chdir(cwd)
     logging.debug(f"Increased trace file count to '{trace_file['total_count']}'")
+
+
+def write_dict_to_disk(trace_file: dict, file_name: Path) -> None:
+    """Writes `trace_file` as `file_name` to disk"""
+    with open(file_name, "w") as file:
+        yaml.dump(trace_file, file, default_flow_style=False)
 
 
 def save_seed_to_trace_file(options: dict, seed: int) -> None:
@@ -45,10 +55,9 @@ def save_seed_to_trace_file(options: dict, seed: int) -> None:
     trace_file_name = config["defaults"]["trace_file"]
     trace_file = load_yaml(trace_file_name)
     trace_file["seed"] = seed
-    with open(trace_file_name, "w") as file:
-        yaml.dump(trace_file, file, default_flow_style=False)
+    write_dict_to_disk(trace_file, trace_file_name)
     os.chdir(cwd)
-    logging.debug(f"Stored seed '{seed}' to tracefile")
+    logging.debug(f"Stored seed '{seed}' to `trace_file`")
 
 
 def write_yaml(output_file: dict, output_file_path: Path) -> None:
@@ -86,3 +95,37 @@ def ensure_folder_exists(path: Path) -> None:
         log_error_and_raise(ValueError(_ERR_NOT_A_FOLDER.format(path)))
     if not path.is_dir():
         path.mkdir(parents=True)
+
+
+def get_trace_file(config: dict, options: dict) -> dict:
+    """Returns loaded `defaults["trace_file"]` or creates new trace file if not present"""
+    defaults = config["defaults"]
+    if defaults.get("trace_file"):
+        trace_file_path = defaults["trace_file"]
+        try:
+            trace_file = load_yaml(trace_file_path)
+        except FileNotFoundError:
+            trace_file = setup_new_trace_file(config, defaults, options, trace_file_path)
+            logging.info(_INFO_NO_TRAC_FILE_FOUND.format(trace_file_path))
+    else:
+        trace_file_name = f"trace_file_{time.strftime('%Y-%m-%d_%H%M%S')}.yaml"
+        trace_file = setup_new_trace_file(config, defaults, options, trace_file_name)
+        logging.warning(_WARN_NO_TRACE_FILE_DEFINED.format(trace_file_name))
+    return trace_file
+
+
+def setup_new_trace_file(config: dict, defaults: dict, options: dict, file_name: str) -> dict:
+    """Returns new trace_file which is added to config and saved to disk with `file_name`"""
+    trace_file = {
+        "total_count": 0,
+        "seed": 0,
+    }
+
+    defaults["trace_file"] = file_name
+    write_dict_to_disk(config, options[CreateOptions.CONFIG])
+
+    base_path = Path(options[CreateOptions.CONFIG]).parent
+    full_path = Path(base_path, file_name)
+    ensure_folder_exists(full_path.parent)
+    write_dict_to_disk(trace_file, full_path)
+    return trace_file

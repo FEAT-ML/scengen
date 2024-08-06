@@ -12,7 +12,7 @@ from typing import Union, List, Dict, Any, Tuple
 from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
-from scengen.files import write_yaml, save_seed_to_trace_file
+from scengen.files import write_yaml, save_seed_to_trace_file, get_trace_file
 from scengen.logs import log_and_raise_critical
 
 numeric = Union[int, float]
@@ -50,7 +50,7 @@ def generate_scenario(options: dict) -> None:
     os.chdir(Path(options[CreateOptions.CONFIG]).parent)
 
     defaults = config["defaults"]
-    trace_file = load_yaml(defaults["trace_file"])
+    trace_file = get_trace_file(config, options)
     count = trace_file["total_count"]
     _set_random_seed(defaults, options, trace_file)
     options["scenario_name"] = defaults["base_name"] + f"_{count}"
