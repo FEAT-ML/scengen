@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2024 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-
-import logging
 import os
 from pathlib import Path
 
@@ -10,14 +8,14 @@ from amirispy.scripts.subcommands import run as amiris
 from amirispy.source.cli import GeneralOptions as AMIRISGeneralOptions
 
 from scengen.cli import CreateOptions, GeneralOptions
-
+from scengen.logs import log
 
 NAME_SCENARIO_YAML = "scenario.yaml"
 
 
 def execute_scenario(options: dict) -> None:
     """Calls AMIRIS after mapping `options` using amirispy functionality"""
-    logging.debug("Executing scenario")
+    log().debug("Executing scenario")
     options = map_options(options)
     amiris.run_amiris(options)
     delete_pb_files()
@@ -40,4 +38,4 @@ def delete_pb_files() -> None:
         try:
             os.remove(Path(os.getcwd(), file))
         except FileNotFoundError:
-            logging.debug(f"Could not delete file `{file}` in current working dir.")
+            log().debug(f"Could not delete file `{file}` in current working dir.")

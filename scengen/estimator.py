@@ -1,13 +1,11 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-
-import logging
 from typing import Tuple
 
 from fameio.source.loader import load_yaml
 
-from scengen.logs import log_and_raise_critical
+from scengen.logs import log_and_raise_critical, log
 
 
 class Amiris:
@@ -39,7 +37,7 @@ def get_installed_capacity(scenario: dict) -> dict:
                         plant_id = int(plant["Id"])
                         installed_power_by_type.setdefault(technology, []).append({plant_id: capacity})
                     elif capacity > 0:
-                        logging.warning("Missing `Id` for powerplant with power of {}".format(capacity))
+                        log().warning("Missing `Id` for powerplant with power of {}".format(capacity))
     return installed_power_by_type
 
 
@@ -77,7 +75,7 @@ def generation_capacity_available(scenario: dict) -> bool:
     capacities = get_installed_capacity(scenario)
     accumulated_capacities = accumulate_capacities(capacities)
     if not accumulated_capacities > 0:
-        logging.warning(f"Accumulated installed capacities seems very low at '{accumulated_capacities}' MW")
+        log().warning(f"Accumulated installed capacities seems very low at '{accumulated_capacities}' MW")
         decision = False
     else:
         decision = True
@@ -86,7 +84,7 @@ def generation_capacity_available(scenario: dict) -> bool:
 
 def estimate_scenario(options: dict) -> bool:
     """Returns True if scenario passes all individual checks"""
-    logging.debug("Calling estimator")
+    log().debug("Calling estimator")
     scenario = load_yaml(options["scenario_path"])
     checks = [generation_capacity_available(scenario)]
     return all(checks)

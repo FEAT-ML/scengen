@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 import copy
-import logging
 import os
 import random
 import time
@@ -13,7 +12,7 @@ from fameio.source.loader import load_yaml
 
 from scengen.cli import CreateOptions
 from scengen.files import write_yaml, save_seed_to_trace_file, get_trace_file
-from scengen.logs import log_and_raise_critical
+from scengen.logs import log_and_raise_critical, log
 
 numeric = Union[int, float]
 
@@ -43,7 +42,7 @@ DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 
 def generate_scenario(options: dict) -> None:
     """Generates a new scenario based on `options` and `scenario_name` stored in `CreateOptions.DIRECTORY`"""
-    logging.debug("Generating scenario")
+    log().debug("Generating scenario")
     config = load_yaml(options[CreateOptions.CONFIG])
 
     cwd = os.getcwd()
@@ -75,7 +74,7 @@ def generate_scenario(options: dict) -> None:
                     _replace_ids_in_contracts(contract_to_append, agent_to_append["Id"], external_ids)
                     scenario["Contracts"].extend(contract_to_append)
     else:
-        logging.debug(DEBUG_NO_CREATE)
+        log().debug(DEBUG_NO_CREATE)
 
     _resolve_identifiers(scenario, options)
     _resolve_ids(scenario)
@@ -93,7 +92,7 @@ def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options:
     if not isinstance(value_from_field, int):
         try:
             rounded_number = round(value_from_field)
-            logging.warning(WARN_ROUNDED_NUMBER_OF_AGENTS.format(rounded_number, RANGE_INT_IDENTIFIER, agent_count))
+            log().warning(WARN_ROUNDED_NUMBER_OF_AGENTS.format(rounded_number, RANGE_INT_IDENTIFIER, agent_count))
             value_from_field = rounded_number
         except TypeError:
             log_and_raise_critical(ERR_NO_INTEGER.format(RANGE_INT_IDENTIFIER, agent_count))
@@ -132,26 +131,26 @@ def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, all
             input_range = _digest_int_range(input_value)
             _validate_input_range(input_range, allow_negative)
             value = random.randint(*input_range)
-            logging.debug(f"Chose random value '{value}' from '{input_value}'.")
+            log().debug(f"Chose random value '{value}' from '{input_value}'.")
         elif RANGE_FLOAT_IDENTIFIER in input_value.lower():
             input_range = _digest_float_range(input_value)
             _validate_input_range(input_range, allow_negative)
             value = random.uniform(*input_range)
-            logging.debug(f"Chose random value '{value}' from '{input_value}'.")
+            log().debug(f"Chose random value '{value}' from '{input_value}'.")
         elif CHOOSE_IDENTIFIER in input_value.lower():
             to_choose = _digest_choose(input_value)
             value = random.choice(to_choose)
-            logging.debug(f"Chose random value '{value}' from list '{input_value}'.")
+            log().debug(f"Chose random value '{value}' from list '{input_value}'.")
         elif PICKFILE_IDENTIFIER in input_value.lower():
             to_pick = _digest_pickfile(input_value, options[CreateOptions.DIRECTORY])
             value = random.choice(to_pick)
-            logging.debug(f"Chose random file '{value}' from path '{input_value}'.")
+            log().debug(f"Chose random file '{value}' from path '{input_value}'.")
         else:
             value = input_value
-            logging.debug(f"Received exactly one input value '{input_value}'.")
+            log().debug(f"Received exactly one input value '{input_value}'.")
     else:
         value = input_value
-        logging.debug(f"Received exactly one input value '{input_value}'.")
+        log().debug(f"Received exactly one input value '{input_value}'.")
     return value
 
 

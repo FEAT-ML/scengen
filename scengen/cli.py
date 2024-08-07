@@ -7,13 +7,13 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Tuple, Dict, Any, Optional, List
 
-from scengen.logs import LogLevels
+from scengen.logs import LogLevel
 
 SCENGEN_PARSER = (
     "Command-line interface to scengen - the scenario generator for the open electricity market model AMIRIS"
 )
 SCENGEN_LOG_FILE_HELP = "Provide logging file (default: None)"
-SCENGEN_LOG_LEVEL_HELP = f"Choose logging level (default: {LogLevels.ERROR.name})"
+SCENGEN_LOG_LEVEL_HELP = f"Choose logging level (default: {LogLevel.ERROR.name})"
 SCENGEN_COMMAND_HELP = "Choose one of the following commands:"
 
 CREATE_HELP = "Creates scenarios for AMIRIS"
@@ -70,8 +70,8 @@ def arg_handling_run(input_args: Optional[List[str]] = None) -> Tuple[Command, D
     parent_parser.add_argument(
         "-l",
         "--log",
-        default=LogLevels.ERROR.name,
-        choices=[level.name.lower() for level in LogLevels],
+        default=LogLevel.ERROR.name,
+        choices=[level.name.lower() for level in LogLevel],
         help=SCENGEN_LOG_LEVEL_HELP,
     )
     subparsers = parent_parser.add_subparsers(dest="command", required=True, help=SCENGEN_COMMAND_HELP)
