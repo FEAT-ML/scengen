@@ -38,6 +38,36 @@ ERR_NO_INTEGER = "Expected a single integer or '{}' but received '{}' for `agent
 ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
 ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
+DEBUG_NO_PATH_TO_BE_REPLACED_IN = "No path to be replaced for Attribute '{}: {}'."
+
+
+def update_series_paths(scenario: dict, options: dict, template_dir: Path) -> None:
+    """
+    Appends relative paths directing to `template_dir` for CSV files defined in `scenario`s `Agents`
+    and (optional) `StringSets`
+    """
+    config_dir = Path(options[CreateOptions.CONFIG]).parent
+    output_dir = Path(options[CreateOptions.DIRECTORY])
+    path_to_append = Path(os.path.relpath(config_dir, start=output_dir), template_dir.parent)
+    for agent in scenario["Agents"]:
+        _replace_timeseries_path_in(agent.get("Attributes", {}), path_to_append)
+    for string_set in scenario.get("StringSet", {}):
+        _replace_timeseries_path_in(string_set, path_to_append)
+
+
+def _replace_timeseries_path_in(attributes: dict, template_path: Path) -> None:
+    """Recursively modify timeseries path in-place in given `attributes` to link to `template_path`"""
+    for attribute_name, attribute_value in attributes.items():
+        if isinstance(attribute_value, str):
+            if attribute_value.lower().endswith(".csv"):
+                attributes[attribute_name] = Path(template_path, attribute_value).__str__()
+        elif isinstance(attribute_value, dict):
+            _replace_timeseries_path_in(attribute_value, template_path)
+        elif isinstance(attribute_value, list):
+            for item in attribute_value:
+                _replace_timeseries_path_in(item, template_path)
+        else:
+            log().debug(DEBUG_NO_PATH_TO_BE_REPLACED_IN.format(attribute_name, attribute_value))
 
 
 def generate_scenario(options: dict) -> None:
@@ -78,6 +108,8 @@ def generate_scenario(options: dict) -> None:
 
     _resolve_identifiers(scenario, options)
     _resolve_ids(scenario)
+    update_series_paths(scenario, options, Path(config["base_template"]))
+
     os.chdir(cwd)
     options["scenario_path"] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml")
     write_yaml(scenario, options["scenario_path"])
@@ -216,7 +248,7 @@ def _digest_choose(input_value: str) -> List[Union[int, float, str]]:
 
 
 def _cast_numeric_strings(values: List[str]) -> List[Union[int, float, str]]:
-    """Returns given List of `values` but numerics are casted in their correct type"""
+    """Returns given List of `values` but numerics are cast in their correct type"""
     casted_values = []
     for value in values:
         try:
