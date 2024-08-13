@@ -34,7 +34,8 @@ Creates AMIRIS scenarios based on user defined input, estimates their plausibili
 | `-d` or `--directory`         | Directory to parse scenarios from and write results to                                                                                                                                                                                         |
 | `-ses` or `--skip_estimation` | Speed-focused approach by omitting the AMIRIS scenario estimation at the expense of bypassing plausibility checks (Default: False)                                                                                                             |
 | `-sev` or `--skip_evaluation` | Speed-focused approach by omitting the AMIRIS result evaluation at the expense of bypassing plausibility checks (Default: False)                                                                                                               |
-| `-oo` or `--output-options`   | Optional arguments to override default output [conversion arguments of fameio](https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results) (e.g. `-oo ["-l critical"]` only forwards critical `fameio` logs to scengen) |
+| `-oo` or `--output-options`   | Optional arguments to override default output [conversion arguments of fameio](https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results) (e.g. `-oo "-l critical"` only forwards critical `fameio` logs to scengen)   |
+| `-nc` or `--no-checks`        | Skip checks for Java installation and correct version to increase speed                                                                                                                                                                        |
 
 The procedure, handled by `workflow.py`, is as follows:
 

@@ -13,6 +13,9 @@ SPDX-License-Identifier: CC0-1.0 -->
 * Update to new `amirispy>=2.2,<3`, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
+## Fixed:
+* Fix `-o/--output-options` documentation on how to use `fameio` output options, [#54](https://github.com/FEAT-ML/scengen/issues/54)
+
 ## Added:
 * New `trace_file` is generated and written to disk if not defined in `GeneratorConfig` or if not found in provided path, [#53](https://github.com/FEAT-ML/scengen/issues/53)
 
