@@ -11,6 +11,44 @@ SPDX-License-Identifier: Apache-2.0 -->
 # scengen
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
 
+## Setup
+
+### Installation (available with v1.0)
+
+    pip install scengen
+
+You may also use `pipx`. For detailed information please refer to the
+official `pipx` [documentation](https://github.com/pypa/pipx).
+
+    pipx install scengen
+
+### Suggested Folder Structure
+We suggest the following folder structure for an easy application of `scengen`.
+
+* `amiris/`: folder containing your amiris binary JAR file and the `fameSetup.yaml`
+* `generatorConfig/`: folder storing the scengen specific `GeneratorConfig.yaml` and the `tracefile.yaml` 
+* `templates/`: folder with all static files for your scenario analysis, e.g. `timeseries/`, `contracts/`, the `scenario_template.yaml` (including the `schema.yaml`), and optional agent-specific `template_{}.yaml` files
+* `scenarios/`: folder with generated scenario YAML files and their simulation output in subfolders
+
+```
+your_working_dir/
+├─ amiris/
+│  ├─ amiris_binary.jar
+│  └─ fameSetup.yaml
+├─ generatorConfig/
+│  ├─ GeneratorConfig.yaml
+│  └─ tracefile.yaml
+├─ templates/
+│  ├─ contracts/
+│  ├─ timeseries/
+│  ├─ my_dynamic_agent_template.yaml
+│  ├─ schema.yaml
+│  └─ scenario_template.yaml
+└─ scenarios/
+   ├─ generated_1/
+   └─ generated_1.yaml
+```
+
 ### Further Requirements
 In order to execute `scengen` correctly, you also require a Java Development Kit (JDK).
 JDK must be installed and accessible via your console in which you run `scengen`.
