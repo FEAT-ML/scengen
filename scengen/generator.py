@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Union, List, Dict, Any, Tuple
 
 from fameio.source.loader import load_yaml
+from fameio.source.tools import keys_to_lower
 
 from scengen.cli import CreateOptions
 from scengen.files import write_yaml, save_seed_to_trace_file, get_trace_file
@@ -356,9 +357,8 @@ def _update_series_paths(scenario: dict, options: dict, template_dir: Path) -> N
     output_dir = Path(options[CreateOptions.DIRECTORY])
     path_to_append = Path(os.path.relpath(config_dir, start=output_dir), template_dir.parent)
     for agent in scenario["Agents"]:
-        _replace_timeseries_path_in(agent.get("Attributes", {}), path_to_append)
-    for string_set in scenario.get("StringSets", {}):
-        _replace_timeseries_path_in(scenario["StringSets"][string_set], path_to_append)
+        agent = keys_to_lower(agent)
+        _replace_timeseries_path_in(agent.get("Attributes".lower(), {}), path_to_append)
 
 
 def _replace_timeseries_path_in(attributes: dict, template_path: Path) -> None:
