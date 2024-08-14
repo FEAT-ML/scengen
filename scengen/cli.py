@@ -34,6 +34,7 @@ CREATE_OUTPUT_OPTION_HELP = (
     "optional pass through of FAME-Io's output conversion options, see "
     "https://gitlab.com/fame-framework/fame-io/-/blob/main/README.md#read-fame-results"
 )
+CREATE_NO_CHECK_HELP = "Skip checks for Java installation and correct version"
 
 
 class GeneralOptions(Enum):
@@ -56,6 +57,7 @@ class CreateOptions(Enum):
     SKIP_ESTIMATION = auto()
     SKIP_EVALUATION = auto()
     OUTPUT_OPTIONS = auto()
+    NO_CHECKS = auto()
 
 
 Options = {
@@ -88,6 +90,7 @@ def arg_handling_run(input_args: Optional[List[str]] = None) -> Tuple[Command, D
         "--skip_evaluation", "-sev", default=False, action="store_true", help=CREATE_SKIP_EVALUATION_HELP
     )
     create_parser.add_argument("--output-options", "-oo", type=str, default="", help=CREATE_OUTPUT_OPTION_HELP)
+    create_parser.add_argument("--no-checks", "-nc", action="store_true", default=False, help=CREATE_NO_CHECK_HELP)
 
     args = vars(parent_parser.parse_args(input_args))
     command = Command[args.pop("command").upper()]

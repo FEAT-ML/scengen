@@ -41,7 +41,7 @@ include = ["CHANGELOG.md"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-amirispy = ">= 2.1, <3.0"
+amirispy = ">= 2.2, <3.0"
 pandas = ">= 2.0, <3.0"
 
 [tool.poetry.group.dev]
