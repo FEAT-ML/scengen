@@ -18,6 +18,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * Fix `-o/--output-options` documentation on how to use `fameio` output options, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 
 ## Added:
+* Raise warning if not at least one replacement identifier (`//THIS_AGENT`) is found in contracts defined in `type_template`, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * New `trace_file` is generated and written to disk if not defined in `GeneratorConfig` or if not found in provided path, [#53](https://github.com/FEAT-ML/scengen/issues/53)
 
 # [v0.2.0](https://github.com/FEAT-ML/scengen/releases/tag/v0.2.0) 2024-04-09 - Barrier bar
