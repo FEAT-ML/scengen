@@ -41,6 +41,7 @@ ERR_FAILED_RESOLVE_ID = "Cannot match replacement Identifier '{}' from Contract 
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 DEBUG_NO_PATH_TO_BE_REPLACED_IN = "No path to be replaced for Attribute '{}: {}'."
 ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS = "Expected to find at least one Replacement Identifier '{}' in Contracts '{}'."
+ERR_MISSING_MATCH = "Found identifier(s) '{}' in `external_ids` but could not match with given agent(s) '{}'."
 
 
 def generate_scenario(options: dict) -> None:
@@ -56,6 +57,7 @@ def generate_scenario(options: dict) -> None:
     scenario = load_yaml(Path(options[CreateOptions.CONFIG].parent, config["base_template"]))
 
     if "create" in config:
+        _raise_if_missing_match(config["create"])
         add_agents(config, options, scenario)
         add_contracts(config, options, scenario)
     else:
@@ -94,6 +96,16 @@ def add_contracts(config: dict, options: dict, scenario: dict) -> None:
                     contracts_to_append = copy.deepcopy(type_template["Contracts"])
                     _create_contracts(contracts_to_append, this_agent_id, external_id)
                     scenario["Contracts"].extend(contracts_to_append)
+
+
+def _raise_if_missing_match(create_config: List[Dict]) -> None:
+    """Raises Error if any external id(s) cannot be matched to dynamically created agents"""
+    these_agents = [config["this_agent"] for config in create_config]
+    for config in create_config:
+        external_ids = config.get("external_ids", [])
+        missing_ids = [external_id for external_id in external_ids if external_id not in these_agents]
+        if missing_ids:
+            log_and_raise_critical(ERR_MISSING_MATCH.format(missing_ids, these_agents))
 
 
 def _get_external_ids_from(scenario: Dict, external_ids: List) -> List:
