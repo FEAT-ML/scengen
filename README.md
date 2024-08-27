@@ -105,7 +105,7 @@ The following checks are implemented:
 
 ##### `configuration` YAML
 This file is mandatory and defines the main inputs for the creation of new scenarios.
-It has the following format with all paths relative to this particular file.
+It has the following format with all paths **relative** to this particular file.
 
 ```yaml
 defaults:  # defaults used for scenario generation

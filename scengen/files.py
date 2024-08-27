@@ -98,7 +98,7 @@ def get_trace_file(config: dict, options: dict) -> dict:
     if defaults.get("trace_file"):
         trace_file_path = defaults["trace_file"]
         try:
-            trace_file = load_yaml(trace_file_path)
+            trace_file = load_yaml(Path(options[CreateOptions.CONFIG].parent, trace_file_path))
         except FileNotFoundError:
             trace_file = setup_new_trace_file(config, defaults, options, trace_file_path)
             log().info(_INFO_NO_TRAC_FILE_FOUND.format(trace_file_path))

@@ -40,7 +40,7 @@ ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, ma
 ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 DEBUG_NO_PATH_TO_BE_REPLACED_IN = "No path to be replaced for Attribute '{}: {}'."
-ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS = "Expected to find at least one Replacement Identifier of format '{}' in Contracts '{}'."
+ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS = "Expected to find at least one Replacement Identifier '{}' in Contracts '{}'."
 
 
 def generate_scenario(options: dict) -> None:
@@ -278,6 +278,7 @@ def _raise_if_no_replacement_identifier_in(contracts: List[Dict]) -> None:
 
 def _replace_ids_in_contracts(contracts: List[dict], agent_id: str, ext_id: Union[dict, None]) -> None:
     """Replaces in-place `agent_id` and optional `ext_id` in given `contracts`"""
+    _raise_if_no_replacement_identifier_in(contracts)
     replace_map = {KEY_THIS_AGENT: agent_id}
     if ext_id:
         for key, value in ext_id.items():
@@ -287,9 +288,7 @@ def _replace_ids_in_contracts(contracts: List[dict], agent_id: str, ext_id: Unio
                 replace_map[key] = REPLACEMENT_IDENTIFIER + value
             else:
                 replace_map[key] = value
-
     for k, v in replace_map.items():
-        _raise_if_no_replacement_identifier_in(contracts)
         _replace_in_dict(contracts, k, v)
 
 
