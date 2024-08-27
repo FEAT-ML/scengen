@@ -122,8 +122,7 @@ create:  # list of agents to create
     # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
     this_agent: "demandTraderDE" # link to other dynamically created agents by name
     external_ids: 
-      exchange: "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
-      forecast: 6 # fixed id used in base_template
+      - "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
 
   - type_template: "agent_templates/EnergyExchange.yaml" # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
     count: 1  # min / max

@@ -37,7 +37,7 @@ ERR_DEPRECATED_RANGE_IDENTIFIER = "Found deprecated identifier in '{}'. Please u
 WARN_ROUNDED_NUMBER_OF_AGENTS = "Rounded `agent_count` to '{}'. Make sure you provide a single integer or '{}' instead of '{}'."
 ERR_NO_INTEGER = "Expected a single integer or '{}' but received '{}' for `agent_count` instead."
 ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
-ERR_FAILED_RESOLVE_ID = "Found replacement Identifier '{}' with no corresponding Agent in Contract '{}'"
+ERR_FAILED_RESOLVE_ID = "Cannot match replacement Identifier '{}' from Contract '{}' to any existing Agent."
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 DEBUG_NO_PATH_TO_BE_REPLACED_IN = "No path to be replaced for Attribute '{}: {}'."
 ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS = "Expected to find at least one Replacement Identifier '{}' in Contracts '{}'."
@@ -56,23 +56,8 @@ def generate_scenario(options: dict) -> None:
     scenario = load_yaml(Path(options[CreateOptions.CONFIG].parent, config["base_template"]))
 
     if "create" in config:
-        for agent in config["create"]:
-            type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, agent["type_template"]))
-            agent_type_template = type_template["Agent"]
-            contract_type_template = type_template.get("Contracts")
-            n_to_create = _get_number_of_agents_to_create(agent["count"], options)
-            agent_name = agent["this_agent"]
-            external_ids = agent.get("external_ids")
-
-            for n in range(n_to_create):
-                agent_to_append = copy.deepcopy(agent_type_template)
-                agent_to_append["Id"] = _get_agent_id(agent_name, n, n_to_create)
-                scenario["Agents"].append(agent_to_append)
-
-                if contract_type_template:
-                    contract_to_append = copy.deepcopy(contract_type_template)
-                    _replace_ids_in_contracts(contract_to_append, agent_to_append["Id"], external_ids)
-                    scenario["Contracts"].extend(contract_to_append)
+        add_agents(config, options, scenario)
+        add_contracts(config, options, scenario)
     else:
         log().debug(DEBUG_NO_CREATE)
 
@@ -82,6 +67,41 @@ def generate_scenario(options: dict) -> None:
 
     options["scenario_path"] = Path(options[CreateOptions.DIRECTORY], options["scenario_name"] + ".yaml")
     write_yaml(scenario, options["scenario_path"])
+
+
+def add_agents(config: dict, options: dict, scenario: dict) -> None:
+    """Adds created agents to `scenario`"""
+    for created_agent in config["create"]:
+        type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, created_agent["type_template"]))
+        agent_type_template = type_template["Agent"]
+        n_to_create = _get_number_of_agents_to_create(created_agent["count"], options)
+        agent_name = created_agent["this_agent"]
+
+        for n in range(n_to_create):
+            agent_to_append = copy.deepcopy(agent_type_template)
+            agent_to_append["Id"] = _get_agent_id(agent_name, n, n_to_create)
+            scenario["Agents"].append(agent_to_append)
+
+
+def add_contracts(config: dict, options: dict, scenario: dict) -> None:
+    """Adds contracts to `scenario`. Note: Ensure that all dynamic agents are already added to the scenario"""
+    for created_agent in config["create"]:
+        type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, created_agent["type_template"]))
+        if type_template.get("Contracts"):
+            ids_of_this_agent = [agent["Id"] for agent in scenario["Agents"] if created_agent["this_agent"] in str(agent["Id"])]
+            for this_agent_id in ids_of_this_agent:
+                for external_id in _get_external_ids_from(scenario, created_agent.get("external_ids")):
+                    contracts_to_append = copy.deepcopy(type_template["Contracts"])
+                    _create_contracts(contracts_to_append, this_agent_id, external_id)
+                    scenario["Contracts"].extend(contracts_to_append)
+
+
+def _get_external_ids_from(scenario: Dict, external_ids: List) -> List:
+    """Returns resolved `external_ids` from created agents in `scenario`"""
+    resolved_external_ids = []
+    for external_id in external_ids:
+        resolved_external_ids.extend([agent["Id"] for agent in scenario["Agents"] if external_id in str(agent["Id"])])
+    return resolved_external_ids
 
 
 def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options: dict) -> int:
@@ -276,28 +296,16 @@ def _raise_if_no_replacement_identifier_in(contracts: List[Dict]) -> None:
         log().warning(ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS.format(KEY_THIS_AGENT, contracts))
 
 
-def _replace_ids_in_contracts(contracts: List[dict], agent_id: str, ext_id: Union[dict, None]) -> None:
-    """Replaces in-place `agent_id` and optional `ext_id` in given `contracts`"""
+def _create_contracts(contracts: List[dict], agent_id: str, ext_id: str) -> None:
+    """Replaces in-place `agent_id` and `ext_id` in given `contracts`"""
     _raise_if_no_replacement_identifier_in(contracts)
-    replace_map = {KEY_THIS_AGENT: agent_id}
-    if ext_id:
-        for key, value in ext_id.items():
-            if isinstance(value, int):
-                replace_map[key] = value
-            elif not value.startswith(REPLACEMENT_IDENTIFIER):
-                replace_map[key] = REPLACEMENT_IDENTIFIER + value
-            else:
-                replace_map[key] = value
-    for k, v in replace_map.items():
-        _replace_in_dict(contracts, k, v)
-
-
-def _replace_in_dict(contracts: List[dict], replace_identifier: str, replace_value: str) -> None:
-    """Recursively searches for `replace_identifier` in contracts and replaces `replace_value` if not integer"""
     for contract in contracts:
         for key, value in contract.items():
-            if isinstance(value, str) and replace_identifier in value:
-                contract[key] = replace_value
+            if isinstance(value, str) and REPLACEMENT_IDENTIFIER in str(value):
+                if value in KEY_THIS_AGENT:
+                    contract[key] = agent_id
+                elif value in ext_id:
+                    contract[key] = ext_id
 
 
 def _resolve_ids(scenario: dict) -> None:

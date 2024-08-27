@@ -11,10 +11,12 @@ SPDX-License-Identifier: CC0-1.0 -->
 * **Breaking**: Renamed replacement identifier from `//THISAGENT` to `//THIS_AGENT` for better readability, [#60](https://github.com/FEAT-ML/scengen/issues/60)
 * **Breaking**: Update minimum version of dependency `amirispy>=2.2,<3`, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 * **Breaking**: `trace_file` is read relatively from the location of the `GeneratorConfig` like all other file paths
+* **Breaking**: Changed attribute type of `external_ids` to from dict to list, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * Update to new logging implementation allowing more flexible and consistent use of logging, [#55](https://github.com/FEAT-ML/scengen/issues/55)
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
 ## Fixed:
+* Fix references to other dynamically created agents in contracts, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * Fix `-o/--output-options` documentation on how to use `fameio` output options, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 
 ## Added:

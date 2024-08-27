@@ -7,13 +7,12 @@ from scengen.generator import (
     _validate_input_range,
     _append_unique_integer_id,
     _create_new_unique_id,
-    _replace_in_dict,
     _get_all_ids_from,
     _get_random_seed,
     _digest_int_range,
     _extract_numbers_from_string,
     _get_agent_id,
-    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range,
+    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range, _create_contracts,
 )
 
 
@@ -60,16 +59,18 @@ class Test:
         assert new_id == expected
 
     @pytest.mark.parametrize(
-        "contracts, replace_identifier, replace_v, expected",
+        "contracts, replace_v, expected, ext_id",
         [
-            ([{"Sender": 12, "Receiver": 12}], "//", 42, [{"Sender": 12, "Receiver": 12}]),
-            ([{"Sender": 12, "Receiver": "//REPLACE_ME"}], "//", 42, [{"Sender": 12, "Receiver": 42}]),
+            ([{"Sender": 12, "Receiver": 12}], 42, [{"Sender": 12, "Receiver": 12}], ""),
+            ([{"Sender": 12, "Receiver": "//THIS_AGENT"}], 42, [{"Sender": 12, "Receiver": 42}], ""),
+            ([{"Sender": 12, "Receiver": "//myDynamicId"}], 42, [{"Sender": 12, "Receiver": "//myDynamicId123"}], "//myDynamicId123"),
+            ([{"Sender": "//THIS_AGENT", "Receiver": "//myDynamicId"}], 111, [{"Sender": 111, "Receiver": "//myDynamicId1234"}], "//myDynamicId1234"),
         ],
     )
-    def test_replace_in_dict(
-        self, contracts: List[dict], replace_identifier: str, replace_v: str, expected: List[dict]
+    def test_create_contracts(
+        self, contracts: List[dict], replace_v: str, expected: List[dict], ext_id: str
     ):
-        _replace_in_dict(contracts, replace_identifier, replace_v)
+        _create_contracts(contracts, replace_v, ext_id)
         assert contracts == expected
 
     @pytest.mark.parametrize(
