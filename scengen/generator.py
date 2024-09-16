@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Union, List, Dict, Any, Tuple
 
 from fameio.source.loader import load_yaml
+from fameio.source.scenario import Contract
 from fameio.source.tools import keys_to_lower
 
 from scengen.cli import CreateOptions
@@ -29,19 +30,23 @@ KEY_THIS_AGENT = f"{REPLACEMENT_IDENTIFIER}THIS_AGENT"
 
 ERR_INVALID_RANGE_INPUT = (
     "Received invalid range input in form '{}'. Please provide in format "
-    f"'{RANGE_INT_IDENTIFIER}(minimum_integer, maximum_integer)' or '{RANGE_FLOAT_IDENTIFIER}(minimum_float, maximum_float)'. "
+    f"'{RANGE_INT_IDENTIFIER}(minimum_integer, maximum_integer)' or "
+    f"'{RANGE_FLOAT_IDENTIFIER}(minimum_float, maximum_float)'. "
     "Negative integers are considered {}"
 )
 ERR_INVALID_RANGE_ORDER = "Received invalid range input in form '{}'. First value must be larger equal to second value."
 ERR_DEPRECATED_RANGE_IDENTIFIER = "Found deprecated identifier in '{}'. Please use '{}' or '{}' instead."
-WARN_ROUNDED_NUMBER_OF_AGENTS = "Rounded `agent_count` to '{}'. Make sure you provide a single integer or '{}' instead of '{}'."
+WARN_ROUNDED_NUMBER_OF_AGENTS = ("Rounded `agent_count` to '{}'. Make sure you provide a single integer or "
+                                 "'{}' instead of '{}'.")
 ERR_NO_INTEGER = "Expected a single integer or '{}' but received '{}' for `agent_count` instead."
 ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
-ERR_FAILED_RESOLVE_ID = "Cannot match replacement Identifier '{}' from Contract '{}' to any existing Agent."
+ERR_FAILED_RESOLVE_ID = ("Cannot match replacement Identifier '{}' from Contract '{}' to any existing Agent. "
+                         f"Make sure to reference either '{KEY_THIS_AGENT}' or any dynamically created agent.")
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 DEBUG_NO_PATH_TO_BE_REPLACED_IN = "No path to be replaced for Attribute '{}: {}'."
-ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS = "Expected to find at least one Replacement Identifier '{}' in Contracts '{}'."
 ERR_MISSING_MATCH = "Found identifier(s) '{}' in `external_ids` but could not match with given agent(s) '{}'."
+ERR_STATIC_CONTRACT = ("Expected dynamic, but found static contract template instead. Replace either `senderid` or "
+                       "`receiverid` with a dynamic replacement_identifier in contract '{}'")
 
 
 def generate_scenario(options: dict) -> None:
@@ -57,9 +62,9 @@ def generate_scenario(options: dict) -> None:
     scenario = load_yaml(Path(options[CreateOptions.CONFIG].parent, config["base_template"]))
 
     if "create" in config:
-        _raise_if_missing_match(config["create"])
-        add_agents(config, options, scenario)
-        add_contracts(config, options, scenario)
+        _raise_if_match_missing(config["create"])
+        add_agents(config["create"], options, scenario)
+        add_contracts(config["create"], options, scenario)
     else:
         log().debug(DEBUG_NO_CREATE)
 
@@ -71,34 +76,7 @@ def generate_scenario(options: dict) -> None:
     write_yaml(scenario, options["scenario_path"])
 
 
-def add_agents(config: dict, options: dict, scenario: dict) -> None:
-    """Adds created agents to `scenario`"""
-    for created_agent in config["create"]:
-        type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, created_agent["type_template"]))
-        agent_type_template = type_template["Agent"]
-        n_to_create = _get_number_of_agents_to_create(created_agent["count"], options)
-        agent_name = created_agent["this_agent"]
-
-        for n in range(n_to_create):
-            agent_to_append = copy.deepcopy(agent_type_template)
-            agent_to_append["Id"] = _get_agent_id(agent_name, n, n_to_create)
-            scenario["Agents"].append(agent_to_append)
-
-
-def add_contracts(config: dict, options: dict, scenario: dict) -> None:
-    """Adds contracts to `scenario`. Note: Ensure that all dynamic agents are already added to the scenario"""
-    for created_agent in config["create"]:
-        type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, created_agent["type_template"]))
-        if type_template.get("Contracts"):
-            ids_of_this_agent = [agent["Id"] for agent in scenario["Agents"] if created_agent["this_agent"] in str(agent["Id"])]
-            for this_agent_id in ids_of_this_agent:
-                for external_id in _get_external_ids_from(scenario, created_agent.get("external_ids")):
-                    contracts_to_append = copy.deepcopy(type_template["Contracts"])
-                    _create_contracts(contracts_to_append, this_agent_id, external_id)
-                    scenario["Contracts"].extend(contracts_to_append)
-
-
-def _raise_if_missing_match(create_config: List[Dict]) -> None:
+def _raise_if_match_missing(create_config: List[Dict]) -> None:
     """Raises Error if any external id(s) cannot be matched to dynamically created agents"""
     these_agents = [config["this_agent"] for config in create_config]
     for config in create_config:
@@ -108,18 +86,79 @@ def _raise_if_missing_match(create_config: List[Dict]) -> None:
             log_and_raise_critical(ERR_MISSING_MATCH.format(missing_ids, these_agents))
 
 
-def _get_external_ids_from(scenario: Dict, external_ids: List) -> List:
-    """Returns resolved `external_ids` from created agents in `scenario`"""
-    resolved_external_ids = []
-    for external_id in external_ids:
-        resolved_external_ids.extend([agent["Id"] for agent in scenario["Agents"] if external_id in str(agent["Id"])])
-    return resolved_external_ids
+def add_agents(agents_to_create: list, options: dict, scenario: dict) -> None:
+    """Adds created agents to `scenario`"""
+    for agent in agents_to_create:
+        type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, agent["type_template"]))
+        agent_type_template = type_template["Agent"]
+        n_to_create = _get_number_of_agents_to_create(agent["count"], options)
+        agent_name = agent["this_agent"]
+
+        for n in range(n_to_create):
+            agent_to_append = copy.deepcopy(agent_type_template)
+            agent_to_append["Id"] = _get_agent_id(agent_name, n, n_to_create)
+            scenario["Agents"].append(agent_to_append)
+
+
+def add_contracts(agents_to_create: list, options: dict, scenario: dict) -> None:
+    """
+    Iterates over agents and adds contracts dynamically to `scenario`.
+    Note: Ensure that all dynamic agents are already added to the scenario
+    """
+    for agent in agents_to_create:
+        type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, agent["type_template"]))
+        if not type_template.get("Contracts"):
+            continue
+        id_map = {
+            KEY_THIS_AGENT: [
+                this_agent["Id"] for this_agent in scenario["Agents"]
+                if agent["this_agent"] in str(this_agent["Id"])
+            ]
+        }
+        for external_id in agent.get("external_ids", []):
+            id_map[REPLACEMENT_IDENTIFIER + external_id] = _get_external_ids_from(scenario, external_id)
+        for contract in type_template.get("Contracts"):
+            contract = Contract.from_dict(contract)
+            _raise_if_static_contract(contract)
+            contracts_to_append = _create_contracts(contract, id_map)
+            scenario["Contracts"].extend(contracts_to_append)
+
+
+def _raise_if_static_contract(contract: Contract) -> None:
+    """Raises Error if `contract` is static, e.g. has neither dynamic `senderid` nor `receiverid`"""
+    sender = str(contract.sender_id)
+    receiver = str(contract.receiver_id)
+    identifier_missing = REPLACEMENT_IDENTIFIER not in sender and REPLACEMENT_IDENTIFIER not in receiver
+    if identifier_missing:
+        log_and_raise_critical(ERR_STATIC_CONTRACT.format(contract))
+
+
+def _create_contracts(contract: Contract, id_map: Dict) -> List[Dict]:
+    """Returns list of dynamically created `contracts` based on template `contract` and `id_map`"""
+    created_contracts = []
+    sender_default = str(contract.sender_id)
+    receiver_default = str(contract.receiver_id)
+    for sender_override in id_map.get(sender_default, [sender_default]):
+        for receiver_override in id_map.get(receiver_default, [receiver_default]):
+            contract_to_append = copy.deepcopy(contract.to_dict())
+            if REPLACEMENT_IDENTIFIER in sender_default:
+                contract_to_append["SenderId".lower()] = sender_override
+            if REPLACEMENT_IDENTIFIER in receiver_default:
+                contract_to_append["ReceiverId".lower()] = receiver_override
+            created_contracts.append(contract_to_append)
+    return created_contracts
+
+
+def _get_external_ids_from(scenario: Dict, external_id: str) -> List:
+    """Returns resolved ids matching `external_id` from created agents in `scenario`"""
+    return [agent["Id"] for agent in scenario["Agents"] if external_id in str(agent["Id"])]
 
 
 def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options: dict) -> int:
     """
     Returns an integer number from field `agent_count`
-    Accepts float values by rounding to integer, but raises warning to notify user about wrong type, for any other data type an Error is raised
+    Accepts float values by rounding to integer, but raises warning to notify user about wrong type,
+    for any other data type an Error is raised
     """
     value_from_field = _get_value_from_field(agent_count, options, allow_negative=False)
     if not isinstance(value_from_field, int):
@@ -159,7 +198,9 @@ def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, all
     """
     if isinstance(input_value, str):
         if RANGE_IDENTIFIER_DEPRECATED in input_value.lower():
-            log_and_raise_critical(ERR_DEPRECATED_RANGE_IDENTIFIER.format(input_value, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER))
+            log_and_raise_critical(
+                ERR_DEPRECATED_RANGE_IDENTIFIER.format(input_value, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER)
+            )
         elif RANGE_INT_IDENTIFIER in input_value.lower():
             input_range = _digest_int_range(input_value)
             _validate_input_range(input_range, allow_negative)
@@ -295,29 +336,6 @@ def _get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int
     agent_id = REPLACEMENT_IDENTIFIER + agent_name
     agent_id += str(agent_number) if n_of_agents_to_create > 1 else ""
     return agent_id
-
-
-def _raise_if_no_replacement_identifier_in(contracts: List[Dict]) -> None:
-    """Raises warning if not at least one `KEY_THIS_AGENT` is found in contracts"""
-    found_replacement_identifier = False
-    for contract in contracts:
-        if KEY_THIS_AGENT in contract.values():
-            found_replacement_identifier = True
-            break
-    if not found_replacement_identifier:
-        log().warning(ERR_NO_REPLACEMENT_IDENTIFIER_IN_CONTRACTS.format(KEY_THIS_AGENT, contracts))
-
-
-def _create_contracts(contracts: List[dict], agent_id: str, ext_id: str) -> None:
-    """Replaces in-place `agent_id` and `ext_id` in given `contracts`"""
-    _raise_if_no_replacement_identifier_in(contracts)
-    for contract in contracts:
-        for key, value in contract.items():
-            if isinstance(value, str) and REPLACEMENT_IDENTIFIER in str(value):
-                if value in KEY_THIS_AGENT:
-                    contract[key] = agent_id
-                elif value in ext_id:
-                    contract[key] = ext_id
 
 
 def _resolve_ids(scenario: dict) -> None:

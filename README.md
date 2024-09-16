@@ -138,6 +138,9 @@ The Agent ID is created by `scengen` directly.
 Optionally, linked `Contracts` are defined in the other section of the file.
 With the reserved key `//THIS_AGENT`, you link to this particular Agent to be created, whereas all other tags with 
 prefix `//` link to the particular agent in the `configuration` YAML under section `external_ids`.
+If any "static" contract template is found (meaning that neither `SenderId` nor `ReceiverId` consists of a `replacement` identifier, an Error is raised.
+Please specify any such contract in the `base_template` as described in the section on the `configuration` YAML.
+
 
 ```yaml
 Agent:
