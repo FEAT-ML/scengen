@@ -117,12 +117,12 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
-    count: choose(1; 3)  # use fixed value
-    # count: range_int(1; 3)  # use a random draw in range (here: 1 as minimum and 3 as maximum)
-    # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
-    this_agent: "demandTraderDE" # link to other dynamically created agents by name
+    count: 3  # creates a fixed number of agents with the same template (here: 3)
+    # count: range_int(1; 3)  # create a random numer of agents between given minimum and maximum (here: 1 as minimum and 3 as maximum)
+    # count: choose(5; 6; 7)  # create a random number of agents by choosing one of the given options (here: either 5, 6, or 7)
+    this_agent: "demandTraderDE" # other agents can link to those created by this template by using this name
     external_ids: 
-      - "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
+      - "energyExchangeDE" # dynamically link to another newly created agent named "energyExchangeDE" - required if you use these names in contracts of the type template
 
   - type_template: "agent_templates/EnergyExchange.yaml" # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
     count: 1  # min / max
