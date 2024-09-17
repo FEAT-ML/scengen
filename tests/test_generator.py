@@ -1,19 +1,19 @@
 import time
-from typing import List, Union, Tuple
+from typing import List, Union, Tuple, Dict
 
 import pytest
+from fameio.source.scenario import Contract
 
 from scengen.generator import (
     _validate_input_range,
     _append_unique_integer_id,
     _create_new_unique_id,
-    _replace_in_dict,
     _get_all_ids_from,
     _get_random_seed,
     _digest_int_range,
     _extract_numbers_from_string,
     _get_agent_id,
-    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range,
+    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range, _create_contracts,
 )
 
 
@@ -60,17 +60,19 @@ class Test:
         assert new_id == expected
 
     @pytest.mark.parametrize(
-        "contracts, replace_identifier, replace_v, expected",
+        "contract, id_map, expected",
         [
-            ([{"Sender": 12, "Receiver": 12}], "//", 42, [{"Sender": 12, "Receiver": 12}]),
-            ([{"Sender": 12, "Receiver": "//REPLACE_ME"}], "//", 42, [{"Sender": 12, "Receiver": 42}]),
+            (Contract(12, 12, "A", 1, 0,), {"//THIS_AGENT": [123]}, [Contract(12, 12, "A", 1, 0,).to_dict()]),
+            (Contract(12, "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123]}, [Contract(12, 123, "A", 1, 0,).to_dict()]),
+            (Contract(12, "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234]}, [Contract(12, 123, "A", 1, 0,).to_dict(), Contract(12, 234, "A", 1, 0,).to_dict()]),
+            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234], "//dynamic": [1]}, [Contract(1, 123, "A", 1, 0,).to_dict(), Contract(1, 234, "A", 1, 0,).to_dict()]),
+            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234], "//dynamicc": [10], "//dynamic": [1]}, [Contract(1, 123, "A", 1, 0,).to_dict(), Contract(1, 234, "A", 1, 0,).to_dict()]),
+            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234], "//dynamic": [1, 11]}, [Contract(1, 123, "A", 1, 0,).to_dict(), Contract(1, 234, "A", 1, 0,).to_dict(), Contract(11, 123, "A", 1, 0,).to_dict(), Contract(11, 234, "A", 1, 0,).to_dict()]),
         ],
     )
-    def test_replace_in_dict(
-        self, contracts: List[dict], replace_identifier: str, replace_v: str, expected: List[dict]
-    ):
-        _replace_in_dict(contracts, replace_identifier, replace_v)
-        assert contracts == expected
+    def test_create_contracts(self, contract: Contract, id_map: dict, expected: List[Dict]):
+        result = _create_contracts(contract, id_map)
+        assert result == expected
 
     @pytest.mark.parametrize(
         "scenario, expected",
@@ -114,12 +116,12 @@ class Test:
     def test_digest_float_range__valid_input(self, values, expected):
         assert _digest_float_range(values) == expected
 
-    @pytest.mark.parametrize("values", [("rnge_int(0; 4)"), ("range_int[10; 30]")])
+    @pytest.mark.parametrize("values", ["rnge_int(0; 4)", "range_int[10; 30]"])
     def test_digest_int_range__invalid_input(self, values):
         with pytest.raises(Exception):
             _digest_int_range(values)
 
-    @pytest.mark.parametrize("values", [("rnge_float(0.1; 4.2)"), ("range_float[10.2; 30.4]")])
+    @pytest.mark.parametrize("values", ["rnge_float(0.1; 4.2)", "range_float[10.2; 30.4]"])
     def test_digest_float_range__invalid_input(self, values):
         with pytest.raises(Exception):
             _digest_float_range(values)

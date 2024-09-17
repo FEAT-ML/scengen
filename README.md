@@ -105,7 +105,7 @@ The following checks are implemented:
 
 ##### `configuration` YAML
 This file is mandatory and defines the main inputs for the creation of new scenarios.
-It has the following format with all paths relative to this particular file.
+It has the following format with all paths **relative** to this particular file.
 
 ```yaml
 defaults:  # defaults used for scenario generation
@@ -117,17 +117,17 @@ base_template: "./template.yaml"  # link to template file containing at least Sc
 
 create:  # list of agents to create
   - type_template: "agent_templates/DemandTrader.yaml"
-    count: choose(1; 3)  # use fixed value
-    # count: range_int(1; 3)  # use a random draw in range (here: 1 as minimum and 3 as maximum)
-    # count: choose(5; 6; 7)  # use a random draw of dedicated options (here: either 5, 6, or 7)
-    this_agent: "demandTraderDE" # link to other dynamically created agents by name
-    external_ids: 
-      exchange: "energyExchangeDE" # dynamically linked to newly created agent referenced herein as "energyExchangeDE"
-      forecast: 6 # fixed id used in base_template
+    count: 3  # creates a fixed number of agents with the same template (here: 3)
+    # count: range_int(1; 3)  # create a random numer of agents between given minimum and maximum (here: 1 as minimum and 3 as maximum)
+    # count: choose(5; 6; 7)  # create a random number of agents by choosing one of the given options (here: either 5, 6, or 7)
+    this_agent: "demandTraderDE" # other agents can link to those created by this template by using this name
+    external_ids:  # provide either identifier, static agent id as single entry or as list in order to replace the identifiers (here: keys) in the type_template's contracts 
+      exchange: ["energyExchangeDE", 1] # replaces "//exchange" in type_template by linking to newly created agent(s) referenced herein as "energyExchangeDE" plus a static agent with id 1
+      forecast: 6 # fixed id to replace "//forecast" in type_template
 
-  - type_template: "agent_templates/EnergyExchange.yaml" # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
+  - type_template: "agent_templates/EnergyExchange.yaml" # file containing the agent definition and contract(s) with agents in same group or pre-defined agents
     count: 1  # min / max
-    this_agent: "energyExchangeDE" # temporary name of this agent for auto-connecting to other agents
+    this_agent: "energyExchangeDE" # other agents can link to that created by this template by using this name
 ```
 
 ##### `type_template` YAML
@@ -139,6 +139,9 @@ The Agent ID is created by `scengen` directly.
 Optionally, linked `Contracts` are defined in the other section of the file.
 With the reserved key `//THIS_AGENT`, you link to this particular Agent to be created, whereas all other tags with 
 prefix `//` link to the particular agent in the `configuration` YAML under section `external_ids`.
+If any "static" contract template is found (meaning that neither `SenderId` nor `ReceiverId` consists of a `replacement` identifier, an Error is raised.
+Please specify any such contract in the `base_template` as described in the section on the `configuration` YAML.
+
 
 ```yaml
 Agent:
