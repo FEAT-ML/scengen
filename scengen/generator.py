@@ -4,13 +4,14 @@
 import copy
 import os
 import random
+import re
 import time
 from pathlib import Path
 from typing import Union, List, Dict, Any, Tuple
 
 from fameio.source.loader import load_yaml
 from fameio.source.scenario import Contract
-from fameio.source.tools import keys_to_lower
+from fameio.source.tools import keys_to_lower, ensure_is_list
 
 from scengen.cli import CreateOptions
 from scengen.files import write_yaml, save_seed_to_trace_file, get_trace_file
@@ -62,7 +63,7 @@ def generate_scenario(options: dict) -> None:
     scenario = load_yaml(Path(options[CreateOptions.CONFIG].parent, config["base_template"]))
 
     if "create" in config:
-        _raise_if_match_missing(config["create"])
+        _raise_if_dynamic_match_missing(config["create"])
         add_agents(config["create"], options, scenario)
         add_contracts(config["create"], options, scenario)
     else:
@@ -76,12 +77,15 @@ def generate_scenario(options: dict) -> None:
     write_yaml(scenario, options["scenario_path"])
 
 
-def _raise_if_match_missing(create_config: List[Dict]) -> None:
-    """Raises Error if any external id(s) cannot be matched to dynamically created agents"""
+def _raise_if_dynamic_match_missing(create_config: List[Dict]) -> None:
+    """Raises Error if any external id(s) cannot be matched to dynamically created agents - skips integer ids"""
     these_agents = [config["this_agent"] for config in create_config]
     for config in create_config:
-        external_ids = config.get("external_ids", [])
-        missing_ids = [external_id for external_id in external_ids if external_id not in these_agents]
+        missing_ids = []
+        for external_id_key, external_id_values in config.get("external_ids", {}).items():
+            for entry in ensure_is_list(external_id_values):
+                if entry not in these_agents and isinstance(entry, str):
+                    missing_ids.append(entry)
         if missing_ids:
             log_and_raise_critical(ERR_MISSING_MATCH.format(missing_ids, these_agents))
 
@@ -109,14 +113,9 @@ def add_contracts(agents_to_create: list, options: dict, scenario: dict) -> None
         type_template = load_yaml(Path(options[CreateOptions.CONFIG].parent, agent["type_template"]))
         if not type_template.get("Contracts"):
             continue
-        id_map = {
-            KEY_THIS_AGENT: [
-                this_agent["Id"] for this_agent in scenario["Agents"]
-                if agent["this_agent"] in str(this_agent["Id"])
-            ]
-        }
-        for external_id in agent.get("external_ids", []):
-            id_map[REPLACEMENT_IDENTIFIER + external_id] = _get_external_ids_from(scenario, external_id)
+        id_map = {KEY_THIS_AGENT: _get_matching_ids_from(scenario, ensure_is_list(agent["this_agent"]))}
+        for id_key, id_values in agent.get("external_ids", {}).items():
+            id_map[REPLACEMENT_IDENTIFIER + id_key] = _get_matching_ids_from(scenario, ensure_is_list(id_values))
         for contract in type_template.get("Contracts"):
             contract = Contract.from_dict(contract)
             _raise_if_static_contract(contract)
@@ -149,9 +148,16 @@ def _create_contracts(contract: Contract, id_map: Dict) -> List[Dict]:
     return created_contracts
 
 
-def _get_external_ids_from(scenario: Dict, external_id: str) -> List:
-    """Returns resolved ids matching `external_id` from created agents in `scenario`"""
-    return [agent["Id"] for agent in scenario["Agents"] if external_id in str(agent["Id"])]
+def _get_matching_ids_from(scenario: Dict, ids_to_look_for: List[Union[str, int]]) -> List:
+    """Returns resolved ids of matching `ids_to_look_for` from created agents in `scenario` and static integer ids"""
+    resolved_ids = []
+    for id_pattern in ids_to_look_for:
+        if isinstance(id_pattern, int):
+            resolved_ids.append(id_pattern)
+        else:
+            pattern = re.compile(rf'//{id_pattern}\d*')
+            resolved_ids.extend([agent["Id"] for agent in scenario["Agents"] if pattern.match(str(agent["Id"]))])
+    return resolved_ids
 
 
 def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options: dict) -> int:
