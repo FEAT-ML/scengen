@@ -19,7 +19,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * Fix `-o/--output-options` documentation on how to use `fameio` output options, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 
 ## Added:
-* Functionality to specify list of dynamic and/or static `external_ids` to replace identifier in dynamic agent contracts, [#59](https://github.com/FEAT-ML/scengen/issues/59)
+* Functionality to specify dynamic and/or static `external_ids` to replace identifier in dynamic agent contracts, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * Raise Warning if not at least one replacement identifier (`//THIS_AGENT`) is found in contracts defined in `type_template`, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * Raise Error if agent identifier in `external_ids` can not be matched to any dynamically created agent, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * New `trace_file` is generated and written to disk if not defined in `GeneratorConfig` or if not found in provided path, [#53](https://github.com/FEAT-ML/scengen/issues/53)

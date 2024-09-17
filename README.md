@@ -121,13 +121,13 @@ create:  # list of agents to create
     # count: range_int(1; 3)  # create a random numer of agents between given minimum and maximum (here: 1 as minimum and 3 as maximum)
     # count: choose(5; 6; 7)  # create a random number of agents by choosing one of the given options (here: either 5, 6, or 7)
     this_agent: "demandTraderDE" # other agents can link to those created by this template by using this name
-    external_ids:  # provide either identifier, static agent id as single entry or as list in order to replace the identifiers (here: keys) in the agent template contracts 
-      exchange: ["energyExchangeDE", 1] # dynamically linked to newly created agent referenced herein as "energyExchangeDE" and static agent with id 1
-      forecast: 6 # fixed id used in base_template
-      
-  - type_template: "agent_templates/EnergyExchange.yaml" # file containing agent definition(s) and contract(s) with agents in same group or pre-defined agents
+    external_ids:  # provide either identifier, static agent id as single entry or as list in order to replace the identifiers (here: keys) in the type_template's contracts 
+      exchange: ["energyExchangeDE", 1] # replaces "//exchange" in type_template by linking to newly created agent(s) referenced herein as "energyExchangeDE" plus a static agent with id 1
+      forecast: 6 # fixed id to replace "//forecast" in type_template
+
+  - type_template: "agent_templates/EnergyExchange.yaml" # file containing the agent definition and contract(s) with agents in same group or pre-defined agents
     count: 1  # min / max
-    this_agent: "energyExchangeDE" # temporary name of this agent for auto-connecting to other agents
+    this_agent: "energyExchangeDE" # other agents can link to that created by this template by using this name
 ```
 
 ##### `type_template` YAML
