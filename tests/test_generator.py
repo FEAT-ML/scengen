@@ -4,17 +4,11 @@ from typing import List, Union, Tuple, Dict
 import pytest
 from fameio.source.scenario import Contract
 
-from scengen.generator import (
-    _validate_input_range,
-    _append_unique_integer_id,
-    _create_new_unique_id,
-    _get_all_ids_from,
-    _get_random_seed,
-    _digest_int_range,
-    _extract_numbers_from_string,
-    _get_agent_id,
-    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range, _create_contracts,
-)
+from scengen.generator.digest import _validate_input_range, _digest_int_range, _digest_float_range, GeneratorConstants, \
+    _get_agent_id
+from scengen.generator.misc import _append_unique_integer_id, _create_new_unique_id, _get_all_ids_from, \
+    _extract_numbers_from_string, _cast_numeric_strings
+from scengen.generator.scenario_generator import ScenarioGenerator
 
 
 class Test:
@@ -71,7 +65,7 @@ class Test:
         ],
     )
     def test_create_contracts(self, contract: Contract, id_map: dict, expected: List[Dict]):
-        result = _create_contracts(contract, id_map)
+        result = ScenarioGenerator._create_contracts(contract, id_map)
         assert result == expected
 
     @pytest.mark.parametrize(
@@ -93,21 +87,6 @@ class Test:
     def test_get_all_ids_from(self, scenario: dict, expected: list[int]):
         assert _get_all_ids_from(scenario) == expected
 
-    @pytest.mark.parametrize("defaults, expected", [({"seed": 42}, 42)])
-    def test_get_random_seed__override_default(self, defaults, expected):
-        seed = _get_random_seed(defaults)
-        assert seed == expected
-
-    @pytest.mark.parametrize(
-        "defaults",
-        [
-            {"no_seed_here": "certainly_no_seed"},
-        ],
-    )
-    def test_get_random_seed__default(self, defaults):
-        seed = _get_random_seed(defaults)
-        assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
-
     @pytest.mark.parametrize("values, expected", [("range_int(0; 4)", (0, 4)), ("RaNGE_inT(-10; 30)", (-10, 30))])
     def test_digest_int_range__valid_input(self, values, expected):
         assert _digest_int_range(values) == expected
@@ -128,11 +107,11 @@ class Test:
 
     @pytest.mark.parametrize("values, expected", [("range_int(0, 4)", "0, 4"), ("RaNgE_int(1, 23", "1, 23")])
     def test_extract_ints_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values, RANGE_INT_IDENTIFIER) == expected
+        assert _extract_numbers_from_string(values, GeneratorConstants.RANGE_INT_IDENTIFIER) == expected
 
     @pytest.mark.parametrize("values, expected", [("range_float(0, 4.0)", "0, 4.0"), ("RaNgE_FlOAT(1.2, 23.2", "1.2, 23.2")])
     def test_extract_floats_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values, RANGE_FLOAT_IDENTIFIER) == expected
+        assert _extract_numbers_from_string(values, GeneratorConstants.RANGE_FLOAT_IDENTIFIER) == expected
 
     @pytest.mark.parametrize(
         "name, agent_n, total_n, expected",
