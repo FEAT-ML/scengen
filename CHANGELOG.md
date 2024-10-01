@@ -11,6 +11,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * **Breaking**: Renamed replacement identifier from `//THISAGENT` to `//THIS_AGENT` for better readability, [#60](https://github.com/FEAT-ML/scengen/issues/60)
 * **Breaking**: Update minimum version of dependency `amirispy>=2.2,<3`, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 * **Breaking**: `trace_file` is read relatively from the location of the `GeneratorConfig` like all other file paths, [#59](https://github.com/FEAT-ML/scengen/issues/59)
+* **Breaking**: Refactored `generator` to its own package, [#57](https://github.com/FEAT-ML/scengen/issues/57)
 * Update to new logging implementation allowing more flexible and consistent use of logging, [#55](https://github.com/FEAT-ML/scengen/issues/55)
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
@@ -19,6 +20,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * Fix `-o/--output-options` documentation on how to use `fameio` output options, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 
 ## Added:
+* `UPGRADING.md` for convenient instructions on how to handle breaking changes, [#57](https://github.com/FEAT-ML/scengen/issues/57)
 * Functionality to specify dynamic and/or static `external_ids` to replace identifier in dynamic agent contracts, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * Raise Warning if not at least one replacement identifier (`//THIS_AGENT`) is found in contracts defined in `type_template`, [#59](https://github.com/FEAT-ML/scengen/issues/59)
 * Raise Error if agent identifier in `external_ids` can not be matched to any dynamically created agent, [#59](https://github.com/FEAT-ML/scengen/issues/59)
