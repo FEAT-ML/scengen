@@ -10,7 +10,10 @@ from fameio.source.tools import ensure_is_list
 
 from scengen.cli import CreateOptions
 from scengen.files import get_trace_file, save_seed_to_trace_file, write_yaml
-from scengen.generator.misc import _resolve_identifiers, _resolve_ids, GeneratorConstants, _get_number_of_agents_to_create, _get_agent_id, _get_matching_ids_from, _update_series_paths, _raise_if_dynamic_match_missing, _raise_if_static_contract
+from scengen.generator.digest import GeneratorConstants, _get_number_of_agents_to_create, _get_agent_id, \
+    _update_series_paths, _resolve_identifiers, _resolve_ids
+from scengen.generator.check import _raise_if_static_contract, _raise_if_dynamic_match_missing
+from scengen.generator.misc import _get_matching_ids_from
 from scengen.logs import log
 
 

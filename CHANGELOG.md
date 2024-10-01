@@ -11,6 +11,7 @@ SPDX-License-Identifier: CC0-1.0 -->
 * **Breaking**: Renamed replacement identifier from `//THISAGENT` to `//THIS_AGENT` for better readability, [#60](https://github.com/FEAT-ML/scengen/issues/60)
 * **Breaking**: Update minimum version of dependency `amirispy>=2.2,<3`, [#54](https://github.com/FEAT-ML/scengen/issues/54)
 * **Breaking**: `trace_file` is read relatively from the location of the `GeneratorConfig` like all other file paths, [#59](https://github.com/FEAT-ML/scengen/issues/59)
+* **Breaking**: Refactored `generator` to its own package, [#57](https://github.com/FEAT-ML/scengen/issues/57)
 * Update to new logging implementation allowing more flexible and consistent use of logging, [#55](https://github.com/FEAT-ML/scengen/issues/55)
 * `setup.py` to `pyproject.toml`, [#51](https://github.com/FEAT-ML/scengen/issues/51)
 
