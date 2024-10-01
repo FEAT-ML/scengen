@@ -5,10 +5,10 @@
 # SPDX-License-Identifier: Apache-2.0
 from typing import Optional, List
 
+from scengen.generator.scenario_generator import ScenarioGenerator
 from scengen.logs import scengen_logger, log
 from scengen.cli import arg_handling_run, GeneralOptions, CreateOptions, Command
 from scengen.estimator import estimate_scenario
-from scengen.generator import generate_scenario
 from scengen.files import delete_all_files, increase_count_in_trace_file
 from scengen.runner import execute_scenario
 from scengen.evaluator import evaluate_scenario
@@ -24,7 +24,8 @@ def scengen_cli(args: Optional[List[str]] = None) -> None:
         requested_scenario_count = options[CreateOptions.NUMBER]
         useful_scenario_count = 0
         while useful_scenario_count < requested_scenario_count:
-            generate_scenario(options)
+            generator = ScenarioGenerator(options)
+            generator.generate_scenarios()
 
             positive_estimation = True if options[CreateOptions.SKIP_ESTIMATION] else estimate_scenario(options)
             if not positive_estimation:
