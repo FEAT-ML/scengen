@@ -12,7 +12,7 @@ from scengen.cli import CreateOptions
 from scengen.files import get_trace_file, save_seed_to_trace_file, write_yaml
 from scengen.generation.digest import get_number_of_agents_to_create, get_agent_id, \
     update_series_paths, resolve_identifiers, resolve_ids, KEY_THIS_AGENT, REPLACEMENT_IDENTIFIER
-from scengen.generation.check import _raise_if_static_contract, _raise_if_dynamic_match_missing
+from scengen.generation.check import raise_if_static_contract, raise_if_dynamic_match_missing
 from scengen.generation.misc import get_matching_ids_from
 from scengen.logs import log
 
@@ -39,7 +39,7 @@ class Generator:
         self._set_scenario(load_yaml(Path(self.options[CreateOptions.CONFIG].parent, self.config["base_template"])))
 
         if "create" in self.config:
-            _raise_if_dynamic_match_missing(self.config["create"])
+            raise_if_dynamic_match_missing(self.config["create"])
             self.add_agents()
             self.add_contracts()
         else:
@@ -109,7 +109,7 @@ class Generator:
                 id_map[REPLACEMENT_IDENTIFIER + id_key] = matched_ids
             for contract in type_template.get("Contracts"):
                 contract = Contract.from_dict(contract)
-                _raise_if_static_contract(contract)
+                raise_if_static_contract(contract)
                 contracts_to_append = self._create_contracts(contract, id_map)
                 self.scenario["Contracts"].extend(contracts_to_append)
 

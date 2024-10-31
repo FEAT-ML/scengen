@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 from fameio.source.scenario import Contract
 from fameio.source.tools import ensure_is_list
 
@@ -7,7 +5,7 @@ from scengen.generation.digest import ERR_STATIC_CONTRACT, ERR_MISSING_MATCH, RE
 from scengen.logs import log_and_raise_critical
 
 
-def _raise_if_static_contract(contract: Contract) -> None:
+def raise_if_static_contract(contract: Contract) -> None:
     """Raises Error if `contract` is static, e.g. has neither dynamic `sender_id` nor `receiver_id`"""
     sender = str(contract.sender_id)
     receiver = str(contract.receiver_id)
@@ -16,7 +14,7 @@ def _raise_if_static_contract(contract: Contract) -> None:
         log_and_raise_critical(ERR_STATIC_CONTRACT.format(contract))
 
 
-def _raise_if_dynamic_match_missing(create_config: List[Dict]) -> None:
+def raise_if_dynamic_match_missing(create_config: list[dict]) -> None:
     """Raises Error if any external id(s) cannot be matched to dynamically created agents - skips integer ids"""
     agent_aliases = [config["this_agent"] for config in create_config]
     for config in create_config:
