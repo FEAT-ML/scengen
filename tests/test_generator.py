@@ -4,10 +4,10 @@ from typing import List, Union, Tuple, Dict
 import pytest
 from fameio.source.scenario import Contract
 
-from scengen.generation.digest import _validate_input_range, _digest_int_range, _digest_float_range, _get_agent_id, \
+from scengen.generation.digest import _validate_input_range, digest_int_range, _digest_float_range, get_agent_id, \
     RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER
-from scengen.generation.misc import _append_unique_integer_id, _create_new_unique_id, _get_all_ids_from, \
-    _extract_numbers_from_string, _cast_numeric_strings
+from scengen.generation.misc import append_unique_integer_id, create_new_unique_id, get_all_ids_from, \
+    extract_numbers_from_string, cast_numeric_strings
 from scengen.generation.generator import Generator
 
 
@@ -38,7 +38,7 @@ class Test:
         ],
     )
     def test_append_unique_integer_id(self, unique_list: List[int], new_id: Union[str, int], expected: List[int]):
-        _append_unique_integer_id(new_id, unique_list)
+        append_unique_integer_id(new_id, unique_list)
         assert unique_list == expected
 
     @pytest.mark.parametrize(
@@ -50,7 +50,7 @@ class Test:
         ],
     )
     def test_create_new_unique_id(self, unique_list: List[int], expected: int):
-        new_id = _create_new_unique_id(unique_list)
+        new_id = create_new_unique_id(unique_list)
         assert new_id == expected
 
     @pytest.mark.parametrize(
@@ -85,11 +85,11 @@ class Test:
         ],
     )
     def test_get_all_ids_from(self, scenario: dict, expected: list[int]):
-        assert _get_all_ids_from(scenario) == expected
+        assert get_all_ids_from(scenario) == expected
 
     @pytest.mark.parametrize("values, expected", [("range_int(0; 4)", (0, 4)), ("RaNGE_inT(-10; 30)", (-10, 30))])
     def test_digest_int_range__valid_input(self, values, expected):
-        assert _digest_int_range(values) == expected
+        assert digest_int_range(values) == expected
 
     @pytest.mark.parametrize("values, expected", [("range_float(0; 4.2)", (0, 4.2)), ("RaNGE_float(-10.999; 30.1)", (-10.999, 30.1))])
     def test_digest_float_range__valid_input(self, values, expected):
@@ -98,7 +98,7 @@ class Test:
     @pytest.mark.parametrize("values", ["rnge_int(0; 4)", "range_int[10; 30]"])
     def test_digest_int_range__invalid_input(self, values):
         with pytest.raises(Exception):
-            _digest_int_range(values)
+            digest_int_range(values)
 
     @pytest.mark.parametrize("values", ["rnge_float(0.1; 4.2)", "range_float[10.2; 30.4]"])
     def test_digest_float_range__invalid_input(self, values):
@@ -107,11 +107,11 @@ class Test:
 
     @pytest.mark.parametrize("values, expected", [("range_int(0, 4)", "0, 4"), ("RaNgE_int(1, 23", "1, 23")])
     def test_extract_ints_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values, RANGE_INT_IDENTIFIER) == expected
+        assert extract_numbers_from_string(values, RANGE_INT_IDENTIFIER) == expected
 
     @pytest.mark.parametrize("values, expected", [("range_float(0, 4.0)", "0, 4.0"), ("RaNgE_FlOAT(1.2, 23.2", "1.2, 23.2")])
     def test_extract_floats_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values, RANGE_FLOAT_IDENTIFIER) == expected
+        assert extract_numbers_from_string(values, RANGE_FLOAT_IDENTIFIER) == expected
 
     @pytest.mark.parametrize(
         "name, agent_n, total_n, expected",
@@ -122,7 +122,7 @@ class Test:
         ],
     )
     def test_get_agent_id(self, name, agent_n, total_n, expected):
-        assert _get_agent_id(name, agent_n, total_n) == expected
+        assert get_agent_id(name, agent_n, total_n) == expected
 
     @pytest.mark.parametrize(
         "values, expected",
@@ -133,4 +133,4 @@ class Test:
         ],
     )
     def test_cast_numeric_strings(self, values, expected):
-        assert _cast_numeric_strings(values) == expected
+        assert cast_numeric_strings(values) == expected

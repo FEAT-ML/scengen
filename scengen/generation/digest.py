@@ -1,13 +1,13 @@
 import os
 import random
 from pathlib import Path
-from typing import Union, List, Any, Dict, Tuple
+from typing import Union, Any
 
 from fameio.source.tools import keys_to_lower
 
 from scengen.cli import CreateOptions
-from scengen.generation.misc import _get_all_ids_from, _create_new_unique_id, _cast_numeric_strings, \
-    _get_relative_paths_in_dir, _extract_numbers_from_string
+from scengen.generation.misc import get_all_ids_from, create_new_unique_id, cast_numeric_strings, \
+    get_relative_paths_in_dir, extract_numbers_from_string
 from scengen.logs import log, log_and_raise_critical
 
 numeric = Union[int, float]
@@ -44,13 +44,13 @@ ERR_FAILED_RESOLVE_ID = ("Cannot match replacement Identifier '{}' from Contract
                          f"or any dynamically created agent.")
 
 
-def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options: dict) -> int:
+def get_number_of_agents_to_create(agent_count: Union[list[Any], Any], options: dict) -> int:
     """
     Returns an integer number from field `agent_count`
     Accepts float values by rounding to integer, but raises warning to notify user about wrong type,
     for any other data type an Error is raised
     """
-    value_from_field = _get_value_from_field(agent_count, options, allow_negative=False)
+    value_from_field = get_value_from_field(agent_count, options, allow_negative=False)
     if not isinstance(value_from_field, int):
         try:
             rounded_number = round(value_from_field)
@@ -61,7 +61,7 @@ def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options:
     return value_from_field
 
 
-def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, allow_negative: bool = True) -> Any:
+def get_value_from_field(input_value: Union[list[Any], Any], options: dict, allow_negative: bool = True) -> Any:
     """
     Returns value stored in `input_value` based on the user specification 'RANGE_INT_IDENTIFIER',
     'RANGE_INT_IDENTIFIER', 'CHOOSE_IDENTIFIER', 'PICKFILE_IDENTIFIER' or else just `input_value`.
@@ -74,21 +74,21 @@ def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, all
                 ERR_DEPRECATED_RANGE_IDENTIFIER.format(input_value, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER)
             )
         elif RANGE_INT_IDENTIFIER in input_value.lower():
-            input_range = _digest_int_range(input_value)
-            _validate_input_range(input_range, allow_negative)
+            input_range = digest_int_range(input_value)
+            validate_input_range(input_range, allow_negative)
             value = random.randint(*input_range)
             log().debug(f"Chose random value '{value}' from '{input_value}'.")
         elif RANGE_FLOAT_IDENTIFIER in input_value.lower():
-            input_range = _digest_float_range(input_value)
-            _validate_input_range(input_range, allow_negative)
+            input_range = digest_float_range(input_value)
+            validate_input_range(input_range, allow_negative)
             value = random.uniform(*input_range)
             log().debug(f"Chose random value '{value}' from '{input_value}'.")
         elif CHOOSE_IDENTIFIER in input_value.lower():
-            to_choose = _digest_choose(input_value)
+            to_choose = digest_choose(input_value)
             value = random.choice(to_choose)
             log().debug(f"Chose random value '{value}' from list '{input_value}'.")
         elif PICKFILE_IDENTIFIER in input_value.lower():
-            to_pick = _digest_pickfile(input_value, options[CreateOptions.DIRECTORY])
+            to_pick = digest_pickfile(input_value, options[CreateOptions.DIRECTORY])
             value = random.choice(to_pick)
             log().debug(f"Chose random file '{value}' from path '{input_value}'.")
         else:
@@ -100,7 +100,7 @@ def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, all
     return value
 
 
-def _get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int) -> str:
+def get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int) -> str:
     """
     Returns `agent_id` with leading REPLACEMENT_IDENTIFIER for `agent_name` considering its `agent_number`
     and `n_of_agents_to_create`
@@ -110,7 +110,7 @@ def _get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int
     return agent_id
 
 
-def _update_series_paths(scenario: dict, options: dict, template_dir: Path) -> None:
+def update_series_paths(scenario: dict, options: dict, template_dir: Path) -> None:
     """
     Appends relative paths directing to `template_dir` for CSV files defined in `scenario`s `Agents`
     and (optional) `StringSets`
@@ -120,25 +120,25 @@ def _update_series_paths(scenario: dict, options: dict, template_dir: Path) -> N
     path_to_append = Path(os.path.relpath(config_dir, start=output_dir), template_dir.parent)
     for agent in scenario["Agents"]:
         agent = keys_to_lower(agent)
-        _replace_timeseries_path_in(agent.get("Attributes".lower(), {}), path_to_append)
+        replace_timeseries_path_in(agent.get("Attributes".lower(), {}), path_to_append)
 
 
-def _replace_timeseries_path_in(attributes: dict, template_path: Path) -> None:
+def replace_timeseries_path_in(attributes: dict, template_path: Path) -> None:
     """Recursively modify timeseries path in-place in given `attributes` to link to `template_path`"""
     for attribute_name, attribute_value in attributes.items():
         if isinstance(attribute_value, str):
             if attribute_value.lower().endswith(".csv"):
                 attributes[attribute_name] = Path(template_path, attribute_value).__str__()
         elif isinstance(attribute_value, dict):
-            _replace_timeseries_path_in(attribute_value, template_path)
+            replace_timeseries_path_in(attribute_value, template_path)
         elif isinstance(attribute_value, list):
             for item in attribute_value:
-                _replace_timeseries_path_in(item, template_path)
+                replace_timeseries_path_in(item, template_path)
         else:
             log().debug(DEBUG_NO_PATH_TO_BE_REPLACED_IN.format(attribute_name, attribute_value))
 
 
-def _validate_input_range(input_range: Tuple[numeric, numeric], allow_negative: bool) -> None:
+def validate_input_range(input_range: tuple[numeric, numeric], allow_negative: bool) -> None:
     """
     Raises Exception if input range is no int or float or list of [minimum, maximum], and
     values >= 0 (if `allow_negative` = False)
@@ -157,9 +157,9 @@ def _validate_input_range(input_range: Tuple[numeric, numeric], allow_negative: 
         log_and_raise_critical(ERR_INVALID_RANGE_INPUT.format(input_range, allow_negative))
 
 
-def _digest_int_range(input_value: str) -> Tuple[int, int]:
+def digest_int_range(input_value: str) -> tuple[int, int]:
     """Returns Tuple of minimum and maximum integer value digested from `input_value` in expected form"""
-    numbers = _extract_numbers_from_string(input_value, RANGE_INT_IDENTIFIER)
+    numbers = extract_numbers_from_string(input_value, RANGE_INT_IDENTIFIER)
     try:
         min_value, max_value = map(int, numbers.split(SEPARATOR))
         return min_value, max_value
@@ -167,9 +167,9 @@ def _digest_int_range(input_value: str) -> Tuple[int, int]:
         log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
 
 
-def _digest_float_range(input_value: str) -> Tuple[float, float]:
+def digest_float_range(input_value: str) -> tuple[float, float]:
     """Returns Tuple of minimum and maximum float value digested from `input_value` in expected form"""
-    numbers = _extract_numbers_from_string(input_value, RANGE_FLOAT_IDENTIFIER)
+    numbers = extract_numbers_from_string(input_value, RANGE_FLOAT_IDENTIFIER)
     try:
         min_value, max_value = map(float, numbers.split(SEPARATOR))
         return min_value, max_value
@@ -177,7 +177,7 @@ def _digest_float_range(input_value: str) -> Tuple[float, float]:
         log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
 
 
-def _digest_choose(input_value: str) -> List[Union[int, float, str]]:
+def digest_choose(input_value: str) -> list[Union[int, float, str]]:
     """Returns List of options digested from given `input_value` string"""
     given_options = (
         input_value.lower()
@@ -189,11 +189,11 @@ def _digest_choose(input_value: str) -> List[Union[int, float, str]]:
         .replace("'", "")
     )
     given_options = given_options.split(SEPARATOR)
-    given_options = _cast_numeric_strings(given_options)
+    given_options = cast_numeric_strings(given_options)
     return given_options
 
 
-def _digest_pickfile(input_value: str, scenario_path: Path) -> List[str]:
+def digest_pickfile(input_value: str, scenario_path: Path) -> list[str]:
     """Returns List of all files in given directory `input_value`"""
     relative_path = (
         input_value.lower()
@@ -205,39 +205,39 @@ def _digest_pickfile(input_value: str, scenario_path: Path) -> List[str]:
         .replace("'", "")
     )
     path_to_dir = Path(scenario_path, relative_path)
-    files_in_dir = _get_relative_paths_in_dir(path_to_dir, relative_path)
+    files_in_dir = get_relative_paths_in_dir(path_to_dir, relative_path)
     return files_in_dir
 
 
-def _resolve_identifiers(input_value: Any, options: dict) -> Any:
+def resolve_identifiers(input_value: Any, options: dict) -> Any:
     """
     Iterates over (potentially nested) `input_value` and returns values from fields
     considering options in `get_value_from_field`
     """
     for key, value in input_value.items():
         if isinstance(value, dict):
-            _resolve_identifiers(value, options)
+            resolve_identifiers(value, options)
         elif isinstance(value, list):
             for index, item in enumerate(value):
                 if isinstance(item, dict):
-                    _resolve_identifiers(item, options)
+                    resolve_identifiers(item, options)
                 else:
-                    input_value[key][index] = _get_value_from_field(item, options)
+                    input_value[key][index] = get_value_from_field(item, options)
         else:
-            input_value[key] = _get_value_from_field(value, options)
+            input_value[key] = get_value_from_field(value, options)
 
 
-def _resolve_ids(scenario: dict) -> None:
+def resolve_ids(scenario: dict) -> None:
     """Resolves in-place all placeholder ID references in Agents & Contracts to unique Ids"""
-    active_ids = _get_all_ids_from(scenario)
-    replacement_map: Dict[str, int] = {}
+    active_ids = get_all_ids_from(scenario)
+    replacement_map: dict[str, int] = {}
     for agent in scenario["Agents"]:
         agent_id = agent["Id"]
         if REPLACEMENT_IDENTIFIER in str(agent_id):
             if agent_id in replacement_map.keys():
                 agent["Id"] = replacement_map[agent_id]
             else:
-                unique_id = _create_new_unique_id(active_ids)
+                unique_id = create_new_unique_id(active_ids)
                 agent["Id"] = replacement_map[agent_id] = unique_id
     for contract in scenario["Contracts"]:
         for key, value in contract.items():

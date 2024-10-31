@@ -10,10 +10,10 @@ from fameio.source.tools import ensure_is_list
 
 from scengen.cli import CreateOptions
 from scengen.files import get_trace_file, save_seed_to_trace_file, write_yaml
-from scengen.generation.digest import _get_number_of_agents_to_create, _get_agent_id, \
-    _update_series_paths, _resolve_identifiers, _resolve_ids, KEY_THIS_AGENT, REPLACEMENT_IDENTIFIER
+from scengen.generation.digest import get_number_of_agents_to_create, get_agent_id, \
+    update_series_paths, resolve_identifiers, resolve_ids, KEY_THIS_AGENT, REPLACEMENT_IDENTIFIER
 from scengen.generation.check import _raise_if_static_contract, _raise_if_dynamic_match_missing
-from scengen.generation.misc import _get_matching_ids_from
+from scengen.generation.misc import get_matching_ids_from
 from scengen.logs import log
 
 
@@ -45,9 +45,9 @@ class Generator:
         else:
             log().debug(DEBUG_NO_CREATE)
 
-        _resolve_identifiers(self.scenario, self.options)
-        _resolve_ids(self.scenario)
-        _update_series_paths(self.scenario, self.options, Path(self.config["base_template"]))
+        resolve_identifiers(self.scenario, self.options)
+        resolve_ids(self.scenario)
+        update_series_paths(self.scenario, self.options, Path(self.config["base_template"]))
 
         self._set_scenario_path(Path(self.options[CreateOptions.DIRECTORY], self.options["scenario_name"] + ".yaml"))
         write_yaml(self.scenario, self.options["scenario_path"])
@@ -86,12 +86,12 @@ class Generator:
         for agent in self.config["create"]:
             type_template = load_yaml(Path(self.options[CreateOptions.CONFIG].parent, agent["type_template"]))
             agent_type_template = type_template["Agent"]
-            n_to_create = _get_number_of_agents_to_create(agent["count"], self.options)
+            n_to_create = get_number_of_agents_to_create(agent["count"], self.options)
             agent_name = agent["this_agent"]
 
             for n in range(n_to_create):
                 agent_to_append = copy.deepcopy(agent_type_template)
-                agent_to_append["Id"] = _get_agent_id(agent_name, n, n_to_create)
+                agent_to_append["Id"] = get_agent_id(agent_name, n, n_to_create)
                 self.scenario["Agents"].append(agent_to_append)
 
     def add_contracts(self) -> None:
@@ -103,9 +103,10 @@ class Generator:
             type_template = load_yaml(Path(self.options[CreateOptions.CONFIG].parent, agent["type_template"]))
             if not type_template.get("Contracts"):
                 continue
-            id_map = {KEY_THIS_AGENT: _get_matching_ids_from(self.scenario, ensure_is_list(agent["this_agent"]))}
+            id_map = {KEY_THIS_AGENT: get_matching_ids_from(self.scenario, ensure_is_list(agent["this_agent"]))}
             for id_key, id_values in agent.get("external_ids", {}).items():
-                id_map[REPLACEMENT_IDENTIFIER + id_key] = _get_matching_ids_from(self.scenario, ensure_is_list(id_values))
+                matched_ids = get_matching_ids_from(self.scenario, ensure_is_list(id_values))
+                id_map[REPLACEMENT_IDENTIFIER + id_key] = matched_ids
             for contract in type_template.get("Contracts"):
                 contract = Contract.from_dict(contract)
                 _raise_if_static_contract(contract)
