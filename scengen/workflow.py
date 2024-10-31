@@ -20,31 +20,35 @@ def scengen_cli(args: Optional[List[str]] = None) -> None:
     scengen_logger(options[GeneralOptions.LOG], options[GeneralOptions.LOGFILE])
 
     if command is Command.CREATE:
-        log().info("Starting to create scenarios")
-        requested_scenario_count = options[CreateOptions.NUMBER]
-        useful_scenario_count = 0
-        while useful_scenario_count < requested_scenario_count:
-            generator = Generator(options)
-            generator.generate_scenarios()
+        create(options)
 
-            positive_estimation = True if options[CreateOptions.SKIP_ESTIMATION] else estimate_scenario(options)
-            if not positive_estimation:
-                log().warning(f"Scenario did not pass estimation. Creating another scenario.")
-                delete_all_files(options)
-                continue
 
-            execute_scenario(options)
+def create(options: dict) -> None:
+    """Handles scenario generation based on given `options`"""
+    log().info("Starting to create scenarios")
+    requested_scenario_count = options[CreateOptions.NUMBER]
+    useful_scenario_count = 0
+    while useful_scenario_count < requested_scenario_count:
+        generator = Generator(options)
+        generator.generate_scenarios()
 
-            positive_evaluation = True if options[CreateOptions.SKIP_EVALUATION] else evaluate_scenario(options)
-            if positive_evaluation:
-                useful_scenario_count += 1
-                increase_count_in_trace_file(options)
-                log().info(f"Created {useful_scenario_count}/{requested_scenario_count} scenarios.")
-            else:
-                log().warning(f"Scenario did not pass evaluation. Restarting.")
-                delete_all_files(options)
+        positive_estimation = True if options[CreateOptions.SKIP_ESTIMATION] else estimate_scenario(options)
+        if not positive_estimation:
+            log().warning(f"Scenario did not pass estimation. Creating another scenario.")
+            delete_all_files(options)
+            continue
 
-        log().info(f"Created scenario {useful_scenario_count} of {requested_scenario_count}.")
+        execute_scenario(options)
+
+        positive_evaluation = True if options[CreateOptions.SKIP_EVALUATION] else evaluate_scenario(options)
+        if positive_evaluation:
+            useful_scenario_count += 1
+            increase_count_in_trace_file(options)
+            log().info(f"Created {useful_scenario_count}/{requested_scenario_count} scenarios.")
+        else:
+            log().warning(f"Scenario did not pass evaluation. Restarting.")
+            delete_all_files(options)
+    log().info(f"Created scenario {useful_scenario_count} of {requested_scenario_count}.")
 
 
 if __name__ == "__main__":
