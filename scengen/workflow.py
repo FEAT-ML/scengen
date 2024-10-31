@@ -3,7 +3,7 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-from typing import Optional, List
+from typing import Optional
 
 from scengen.generation.generator import Generator
 from scengen.logs import scengen_logger, log
@@ -14,7 +14,7 @@ from scengen.runner import execute_scenario
 from scengen.evaluator import evaluate_scenario
 
 
-def scengen_cli(args: Optional[List[str]] = None) -> None:
+def scengen_cli(args: Optional[list[str]] = None) -> None:
     """Calls sub-commands with appropriate arguments as returned by the command line parser"""
     command, options = arg_handling_run(args)
     scengen_logger(options[GeneralOptions.LOG], options[GeneralOptions.LOGFILE])

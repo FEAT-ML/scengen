@@ -4,7 +4,7 @@
 import logging as pylog
 from enum import Enum
 from pathlib import Path
-from typing import NoReturn, Optional, List
+from typing import NoReturn, Optional
 
 
 class LogLevel(Enum):
@@ -19,8 +19,8 @@ class LogLevel(Enum):
     DEBUG = pylog.DEBUG
 
 
-_loggers: List[pylog.Logger] = []
-_handlers: List[pylog.Handler] = []
+_loggers: list[pylog.Logger] = []
+_handlers: list[pylog.Handler] = []
 
 _FORMAT_NORMAL = "%(asctime)s — %(levelname)s — %(message)s"  # noqa
 _FORMAT_DETAILLED = "%(asctime)s.%(msecs)03d — %(levelname)s — %(module)s:%(funcName)s:%(lineno)d — %(message)s"  # noqa

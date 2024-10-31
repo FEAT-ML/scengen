@@ -2,7 +2,6 @@ import copy
 import random
 import time
 from pathlib import Path
-from typing import Dict, List
 
 from fameio.source.loader import load_yaml
 from fameio.source.scenario import Contract
@@ -114,7 +113,7 @@ class Generator:
                 self.scenario["Contracts"].extend(contracts_to_append)
 
     @staticmethod
-    def _create_contracts(contract: Contract, id_map: Dict) -> List[Dict]:
+    def _create_contracts(contract: Contract, id_map: dict) -> list[dict]:
         """Returns list of dynamically created `contracts` based on template `contract` and `id_map`"""
         created_contracts = []
         sender_default = str(contract.sender_id)
