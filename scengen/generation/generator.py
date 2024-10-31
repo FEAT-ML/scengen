@@ -10,17 +10,18 @@ from fameio.source.tools import ensure_is_list
 
 from scengen.cli import CreateOptions
 from scengen.files import get_trace_file, save_seed_to_trace_file, write_yaml
-from scengen.generator.digest import GeneratorConstants, _get_number_of_agents_to_create, _get_agent_id, \
-    _update_series_paths, _resolve_identifiers, _resolve_ids
-from scengen.generator.check import _raise_if_static_contract, _raise_if_dynamic_match_missing
-from scengen.generator.misc import _get_matching_ids_from
+from scengen.generation.digest import _get_number_of_agents_to_create, _get_agent_id, \
+    _update_series_paths, _resolve_identifiers, _resolve_ids, KEY_THIS_AGENT, REPLACEMENT_IDENTIFIER
+from scengen.generation.check import _raise_if_static_contract, _raise_if_dynamic_match_missing
+from scengen.generation.misc import _get_matching_ids_from
 from scengen.logs import log
 
 
 DEBUG_NO_CREATE = "No agents to `create` found in Config '{}'"
 
 
-class ScenarioGenerator:
+class Generator:
+    """Main scenario generator class"""
     def __init__(self, options: dict):
         self.options = options
         self.config = load_yaml(self.options[CreateOptions.CONFIG])
@@ -102,9 +103,9 @@ class ScenarioGenerator:
             type_template = load_yaml(Path(self.options[CreateOptions.CONFIG].parent, agent["type_template"]))
             if not type_template.get("Contracts"):
                 continue
-            id_map = {GeneratorConstants.KEY_THIS_AGENT: _get_matching_ids_from(self.scenario, ensure_is_list(agent["this_agent"]))}
+            id_map = {KEY_THIS_AGENT: _get_matching_ids_from(self.scenario, ensure_is_list(agent["this_agent"]))}
             for id_key, id_values in agent.get("external_ids", {}).items():
-                id_map[GeneratorConstants.REPLACEMENT_IDENTIFIER + id_key] = _get_matching_ids_from(self.scenario, ensure_is_list(id_values))
+                id_map[REPLACEMENT_IDENTIFIER + id_key] = _get_matching_ids_from(self.scenario, ensure_is_list(id_values))
             for contract in type_template.get("Contracts"):
                 contract = Contract.from_dict(contract)
                 _raise_if_static_contract(contract)
@@ -120,10 +121,10 @@ class ScenarioGenerator:
         for sender_override in id_map.get(sender_default, [sender_default]):
             for receiver_override in id_map.get(receiver_default, [receiver_default]):
                 contract_to_append = copy.deepcopy(contract.to_dict())
-                if GeneratorConstants.REPLACEMENT_IDENTIFIER in sender_default:
+                if REPLACEMENT_IDENTIFIER in sender_default:
                     # noinspection PyProtectedMember
                     contract_to_append[Contract._KEY_SENDER] = sender_override
-                if GeneratorConstants.REPLACEMENT_IDENTIFIER in receiver_default:
+                if REPLACEMENT_IDENTIFIER in receiver_default:
                     # noinspection PyProtectedMember
                     contract_to_append[Contract._KEY_RECEIVER] = receiver_override
                 created_contracts.append(contract_to_append)

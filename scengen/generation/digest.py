@@ -6,28 +6,27 @@ from typing import Union, List, Any, Dict, Tuple
 from fameio.source.tools import keys_to_lower
 
 from scengen.cli import CreateOptions
-from scengen.generator.misc import _get_all_ids_from, _create_new_unique_id, _cast_numeric_strings, \
+from scengen.generation.misc import _get_all_ids_from, _create_new_unique_id, _cast_numeric_strings, \
     _get_relative_paths_in_dir, _extract_numbers_from_string
 from scengen.logs import log, log_and_raise_critical
 
 numeric = Union[int, float]
 
 
-class GeneratorConstants:
-    SEPARATOR = ";"
-    RANGE_INT_IDENTIFIER = "range_int"
-    RANGE_FLOAT_IDENTIFIER = "range_float"
-    RANGE_IDENTIFIER_DEPRECATED = "range("
-    CHOOSE_IDENTIFIER = "choose"
-    PICKFILE_IDENTIFIER = "pickfile"
-    REPLACEMENT_IDENTIFIER = "//"
-    KEY_THIS_AGENT = f"{REPLACEMENT_IDENTIFIER}THIS_AGENT"
+SEPARATOR = ";"
+RANGE_INT_IDENTIFIER = "range_int"
+RANGE_FLOAT_IDENTIFIER = "range_float"
+RANGE_IDENTIFIER_DEPRECATED = "range("
+CHOOSE_IDENTIFIER = "choose"
+PICKFILE_IDENTIFIER = "pickfile"
+REPLACEMENT_IDENTIFIER = "//"
+KEY_THIS_AGENT = f"{REPLACEMENT_IDENTIFIER}THIS_AGENT"
 
 
 ERR_INVALID_RANGE_INPUT = (
     "Received invalid range input in form '{}'. Please provide in format "
-    f"'{GeneratorConstants.RANGE_INT_IDENTIFIER}(minimum_integer, maximum_integer)' or "
-    f"'{GeneratorConstants.RANGE_FLOAT_IDENTIFIER}(minimum_float, maximum_float)'. "
+    f"'{RANGE_INT_IDENTIFIER}(minimum_integer, maximum_integer)' or "
+    f"'{RANGE_FLOAT_IDENTIFIER}(minimum_float, maximum_float)'. "
     "Negative integers are considered {}"
 )
 ERR_INVALID_RANGE_ORDER = "Received invalid range input in form '{}'. First value must be larger equal to second value."
@@ -41,7 +40,7 @@ ERR_NO_INTEGER = "Expected a single integer or '{}' but received '{}' for `agent
 DEBUG_NO_PATH_TO_BE_REPLACED_IN = "No path to be replaced for Attribute '{}: {}'."
 ERR_COULD_NOT_MAP_RANGE_VALUES = "Could not map range values '{}' to minimum, maximum values."
 ERR_FAILED_RESOLVE_ID = ("Cannot match replacement Identifier '{}' from Contract '{}' to any existing Agent. "
-                         f"Make sure to reference either '{GeneratorConstants.KEY_THIS_AGENT}' "
+                         f"Make sure to reference either '{KEY_THIS_AGENT}' "
                          f"or any dynamically created agent.")
 
 
@@ -55,10 +54,10 @@ def _get_number_of_agents_to_create(agent_count: Union[List[Any], Any], options:
     if not isinstance(value_from_field, int):
         try:
             rounded_number = round(value_from_field)
-            log().warning(WARN_ROUNDED_NUMBER_OF_AGENTS.format(rounded_number, GeneratorConstants.RANGE_INT_IDENTIFIER, agent_count))
+            log().warning(WARN_ROUNDED_NUMBER_OF_AGENTS.format(rounded_number, RANGE_INT_IDENTIFIER, agent_count))
             value_from_field = rounded_number
         except TypeError:
-            log_and_raise_critical(ERR_NO_INTEGER.format(GeneratorConstants.RANGE_INT_IDENTIFIER, agent_count))
+            log_and_raise_critical(ERR_NO_INTEGER.format(RANGE_INT_IDENTIFIER, agent_count))
     return value_from_field
 
 
@@ -70,25 +69,25 @@ def _get_value_from_field(input_value: Union[List[Any], Any], options: dict, all
     In option `PICKFILE_IDENTIFIER`, `options[CreateOptions.DIRECTORY]` is used to get files: paths relative to scenario
     """
     if isinstance(input_value, str):
-        if GeneratorConstants.RANGE_IDENTIFIER_DEPRECATED in input_value.lower():
+        if RANGE_IDENTIFIER_DEPRECATED in input_value.lower():
             log_and_raise_critical(
-                ERR_DEPRECATED_RANGE_IDENTIFIER.format(input_value, GeneratorConstants.RANGE_INT_IDENTIFIER, GeneratorConstants.RANGE_FLOAT_IDENTIFIER)
+                ERR_DEPRECATED_RANGE_IDENTIFIER.format(input_value, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER)
             )
-        elif GeneratorConstants.RANGE_INT_IDENTIFIER in input_value.lower():
+        elif RANGE_INT_IDENTIFIER in input_value.lower():
             input_range = _digest_int_range(input_value)
             _validate_input_range(input_range, allow_negative)
             value = random.randint(*input_range)
             log().debug(f"Chose random value '{value}' from '{input_value}'.")
-        elif GeneratorConstants.RANGE_FLOAT_IDENTIFIER in input_value.lower():
+        elif RANGE_FLOAT_IDENTIFIER in input_value.lower():
             input_range = _digest_float_range(input_value)
             _validate_input_range(input_range, allow_negative)
             value = random.uniform(*input_range)
             log().debug(f"Chose random value '{value}' from '{input_value}'.")
-        elif GeneratorConstants.CHOOSE_IDENTIFIER in input_value.lower():
+        elif CHOOSE_IDENTIFIER in input_value.lower():
             to_choose = _digest_choose(input_value)
             value = random.choice(to_choose)
             log().debug(f"Chose random value '{value}' from list '{input_value}'.")
-        elif GeneratorConstants.PICKFILE_IDENTIFIER in input_value.lower():
+        elif PICKFILE_IDENTIFIER in input_value.lower():
             to_pick = _digest_pickfile(input_value, options[CreateOptions.DIRECTORY])
             value = random.choice(to_pick)
             log().debug(f"Chose random file '{value}' from path '{input_value}'.")
@@ -106,7 +105,7 @@ def _get_agent_id(agent_name: str, agent_number: int, n_of_agents_to_create: int
     Returns `agent_id` with leading REPLACEMENT_IDENTIFIER for `agent_name` considering its `agent_number`
     and `n_of_agents_to_create`
     """
-    agent_id = GeneratorConstants.REPLACEMENT_IDENTIFIER + agent_name
+    agent_id = REPLACEMENT_IDENTIFIER + agent_name
     agent_id += str(agent_number) if n_of_agents_to_create > 1 else ""
     return agent_id
 
@@ -160,9 +159,9 @@ def _validate_input_range(input_range: Tuple[numeric, numeric], allow_negative: 
 
 def _digest_int_range(input_value: str) -> Tuple[int, int]:
     """Returns Tuple of minimum and maximum integer value digested from `input_value` in expected form"""
-    numbers = _extract_numbers_from_string(input_value, GeneratorConstants.RANGE_INT_IDENTIFIER)
+    numbers = _extract_numbers_from_string(input_value, RANGE_INT_IDENTIFIER)
     try:
-        min_value, max_value = map(int, numbers.split(GeneratorConstants.SEPARATOR))
+        min_value, max_value = map(int, numbers.split(SEPARATOR))
         return min_value, max_value
     except ValueError:
         log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
@@ -170,9 +169,9 @@ def _digest_int_range(input_value: str) -> Tuple[int, int]:
 
 def _digest_float_range(input_value: str) -> Tuple[float, float]:
     """Returns Tuple of minimum and maximum float value digested from `input_value` in expected form"""
-    numbers = _extract_numbers_from_string(input_value, GeneratorConstants.RANGE_FLOAT_IDENTIFIER)
+    numbers = _extract_numbers_from_string(input_value, RANGE_FLOAT_IDENTIFIER)
     try:
-        min_value, max_value = map(float, numbers.split(GeneratorConstants.SEPARATOR))
+        min_value, max_value = map(float, numbers.split(SEPARATOR))
         return min_value, max_value
     except ValueError:
         log_and_raise_critical(ERR_COULD_NOT_MAP_RANGE_VALUES.format(numbers))
@@ -182,14 +181,14 @@ def _digest_choose(input_value: str) -> List[Union[int, float, str]]:
     """Returns List of options digested from given `input_value` string"""
     given_options = (
         input_value.lower()
-        .replace(GeneratorConstants.CHOOSE_IDENTIFIER, "")
+        .replace(CHOOSE_IDENTIFIER, "")
         .replace("(", "")
         .replace(")", "")
         .replace(" ", "")
         .replace('"', "")
         .replace("'", "")
     )
-    given_options = given_options.split(GeneratorConstants.SEPARATOR)
+    given_options = given_options.split(SEPARATOR)
     given_options = _cast_numeric_strings(given_options)
     return given_options
 
@@ -198,7 +197,7 @@ def _digest_pickfile(input_value: str, scenario_path: Path) -> List[str]:
     """Returns List of all files in given directory `input_value`"""
     relative_path = (
         input_value.lower()
-        .replace(GeneratorConstants.PICKFILE_IDENTIFIER, "")
+        .replace(PICKFILE_IDENTIFIER, "")
         .replace("(", "")
         .replace(")", "")
         .replace(" ", "")
@@ -234,7 +233,7 @@ def _resolve_ids(scenario: dict) -> None:
     replacement_map: Dict[str, int] = {}
     for agent in scenario["Agents"]:
         agent_id = agent["Id"]
-        if GeneratorConstants.REPLACEMENT_IDENTIFIER in str(agent_id):
+        if REPLACEMENT_IDENTIFIER in str(agent_id):
             if agent_id in replacement_map.keys():
                 agent["Id"] = replacement_map[agent_id]
             else:
@@ -242,7 +241,7 @@ def _resolve_ids(scenario: dict) -> None:
                 agent["Id"] = replacement_map[agent_id] = unique_id
     for contract in scenario["Contracts"]:
         for key, value in contract.items():
-            if GeneratorConstants.REPLACEMENT_IDENTIFIER in str(value):
+            if REPLACEMENT_IDENTIFIER in str(value):
                 try:
                     contract[key] = replacement_map[value]
                 except KeyError:

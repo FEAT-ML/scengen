@@ -3,7 +3,7 @@ from typing import List, Dict
 from fameio.source.scenario import Contract
 from fameio.source.tools import ensure_is_list
 
-from scengen.generator.digest import GeneratorConstants, ERR_STATIC_CONTRACT, ERR_MISSING_MATCH
+from scengen.generation.digest import ERR_STATIC_CONTRACT, ERR_MISSING_MATCH, REPLACEMENT_IDENTIFIER
 from scengen.logs import log_and_raise_critical
 
 
@@ -11,7 +11,7 @@ def _raise_if_static_contract(contract: Contract) -> None:
     """Raises Error if `contract` is static, e.g. has neither dynamic `sender_id` nor `receiver_id`"""
     sender = str(contract.sender_id)
     receiver = str(contract.receiver_id)
-    identifier_missing = GeneratorConstants.REPLACEMENT_IDENTIFIER not in sender and GeneratorConstants.REPLACEMENT_IDENTIFIER not in receiver
+    identifier_missing = REPLACEMENT_IDENTIFIER not in sender and REPLACEMENT_IDENTIFIER not in receiver
     if identifier_missing:
         log_and_raise_critical(ERR_STATIC_CONTRACT.format(contract))
 
