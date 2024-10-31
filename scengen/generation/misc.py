@@ -4,12 +4,6 @@ from pathlib import Path
 from typing import Union
 
 
-def append_unique_integer_id(agent_id: Union[str, int], unique_ids: list[int]):
-    """Appends `agent_id` to `unique_ids` if integer and unique"""
-    if isinstance(agent_id, int) and agent_id not in unique_ids:
-        unique_ids.append(agent_id)
-
-
 def get_matching_ids_from(scenario: dict, ids_to_look_for: list[Union[str, int]]) -> list:
     """Returns resolved ids of matching `ids_to_look_for` from created agents in `scenario` and static integer ids"""
     resolved_ids = []
@@ -24,10 +18,8 @@ def get_matching_ids_from(scenario: dict, ids_to_look_for: list[Union[str, int]]
 
 def get_all_ids_from(scenario: dict) -> list[int]:
     """Returns list of unique Agent Ids in given `scenario`"""
-    unique_ids = []
-    for agent in scenario["Agents"]:
-        append_unique_integer_id(agent["Id"], unique_ids)
-    return unique_ids
+    unique_ids = [agent["Id"] for agent in scenario["Agents"] if isinstance(agent["Id"], int)]
+    return list(set(unique_ids))
 
 
 def create_new_unique_id(unique_ids: list[int]) -> int:
