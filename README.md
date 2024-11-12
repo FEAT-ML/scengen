@@ -8,6 +8,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <!-- [![coverage report](docu/coverage.svg)](https://github.com/FEAT-ML/scenario-generator)  to be enabled once badge is created and stored correctly, see issue #30-->
 
+
+# *Note: `scengen` has been renamed to `AMIRIS-Scengen` and is now hosted at GitLab, see https://gitlab.com/dlr-ve/esy/amiris/amiris-scengen*
+
 # scengen
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
 
