@@ -1,30 +1,21 @@
-import time
-from typing import List, Union, Tuple, Dict
-
 import pytest
 from fameio.source.scenario import Contract
 
-from scengen.generator import (
-    _validate_input_range,
-    _append_unique_integer_id,
-    _create_new_unique_id,
-    _get_all_ids_from,
-    _get_random_seed,
-    _digest_int_range,
-    _extract_numbers_from_string,
-    _get_agent_id,
-    _cast_numeric_strings, RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER, _digest_float_range, _create_contracts,
-)
+from scengen.generation.digest import validate_input_range, digest_int_range, digest_float_range, get_agent_id, \
+    RANGE_INT_IDENTIFIER, RANGE_FLOAT_IDENTIFIER
+from scengen.generation.misc import create_new_unique_id, get_all_ids_from, \
+    extract_numbers_from_string, cast_numeric_strings
+from scengen.generation.generator import Generator
 
 
 class Test:
     @pytest.mark.parametrize("values", [(10, 20), (1, 2), (1, 11111111111), (0, 3)])
-    def test_validate_input_range__valid(self, values: Tuple[int, int]):
-        _validate_input_range(values, allow_negative=False)
+    def test_validate_input_range__valid(self, values: tuple[int, int]):
+        validate_input_range(values, allow_negative=False)
 
     @pytest.mark.parametrize("values", [(-10, 0), (-2, 1), (-0, 11111111111)])
-    def test_validate_input_range__valid(self, values: Tuple[int, int]):
-        _validate_input_range(values, allow_negative=True)
+    def test_validate_input_range__valid(self, values: tuple[int, int]):
+        validate_input_range(values, allow_negative=True)
 
     @pytest.mark.parametrize(
         "values",
@@ -32,20 +23,7 @@ class Test:
     )
     def test_validate_input_range__invalid_type(self, values):
         with pytest.raises(Exception):
-            _validate_input_range(values, allow_negative=False)
-
-    @pytest.mark.parametrize(
-        "unique_list, new_id, expected",
-        [
-            ([2, 3], 4, [2, 3, 4]),
-            ([2, 3], 3, [2, 3]),
-            ([], 3, [3]),
-            ([2, 3], "replacement_id", [2, 3]),
-        ],
-    )
-    def test_append_unique_integer_id(self, unique_list: List[int], new_id: Union[str, int], expected: List[int]):
-        _append_unique_integer_id(new_id, unique_list)
-        assert unique_list == expected
+            validate_input_range(values, allow_negative=False)
 
     @pytest.mark.parametrize(
         "unique_list, expected",
@@ -55,23 +33,31 @@ class Test:
             ([2, 1000, 3], 1001),
         ],
     )
-    def test_create_new_unique_id(self, unique_list: List[int], expected: int):
-        new_id = _create_new_unique_id(unique_list)
+    def test_create_new_unique_id(self, unique_list: list[int], expected: int):
+        new_id = create_new_unique_id(unique_list)
         assert new_id == expected
 
+    # noinspection PyTypeChecker
     @pytest.mark.parametrize(
         "contract, id_map, expected",
         [
-            (Contract(12, 12, "A", 1, 0,), {"//THIS_AGENT": [123]}, [Contract(12, 12, "A", 1, 0,).to_dict()]),
-            (Contract(12, "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123]}, [Contract(12, 123, "A", 1, 0,).to_dict()]),
-            (Contract(12, "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234]}, [Contract(12, 123, "A", 1, 0,).to_dict(), Contract(12, 234, "A", 1, 0,).to_dict()]),
-            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234], "//dynamic": [1]}, [Contract(1, 123, "A", 1, 0,).to_dict(), Contract(1, 234, "A", 1, 0,).to_dict()]),
-            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234], "//dynamicc": [10], "//dynamic": [1]}, [Contract(1, 123, "A", 1, 0,).to_dict(), Contract(1, 234, "A", 1, 0,).to_dict()]),
-            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0,), {"//THIS_AGENT": [123, 234], "//dynamic": [1, 11]}, [Contract(1, 123, "A", 1, 0,).to_dict(), Contract(1, 234, "A", 1, 0,).to_dict(), Contract(11, 123, "A", 1, 0,).to_dict(), Contract(11, 234, "A", 1, 0,).to_dict()]),
+            (Contract(12, 12, "A", 1, 0, ), {"//THIS_AGENT": [123]}, [Contract(12, 12, "A", 1, 0, ).to_dict()]),
+            (Contract(12, "//THIS_AGENT", "A", 1, 0, ), {"//THIS_AGENT": [123]},
+             [Contract(12, 123, "A", 1, 0, ).to_dict()]),
+            (Contract(12, "//THIS_AGENT", "A", 1, 0, ), {"//THIS_AGENT": [123, 234]},
+             [Contract(12, 123, "A", 1, 0, ).to_dict(), Contract(12, 234, "A", 1, 0, ).to_dict()]),
+            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0, ), {"//THIS_AGENT": [123, 234], "//dynamic": [1]},
+             [Contract(1, 123, "A", 1, 0, ).to_dict(), Contract(1, 234, "A", 1, 0, ).to_dict()]),
+            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0, ),
+             {"//THIS_AGENT": [123, 234], "//dynamic2": [10], "//dynamic": [1]},
+             [Contract(1, 123, "A", 1, 0, ).to_dict(), Contract(1, 234, "A", 1, 0, ).to_dict()]),
+            (Contract("//dynamic", "//THIS_AGENT", "A", 1, 0, ), {"//THIS_AGENT": [123, 234], "//dynamic": [1, 11]},
+             [Contract(1, 123, "A", 1, 0, ).to_dict(), Contract(1, 234, "A", 1, 0, ).to_dict(),
+              Contract(11, 123, "A", 1, 0, ).to_dict(), Contract(11, 234, "A", 1, 0, ).to_dict()]),
         ],
     )
-    def test_create_contracts(self, contract: Contract, id_map: dict, expected: List[Dict]):
-        result = _create_contracts(contract, id_map)
+    def test_create_contracts(self, contract: Contract, id_map: dict, expected: list[dict]):
+        result = Generator._create_contracts(contract, id_map)
         assert result == expected
 
     @pytest.mark.parametrize(
@@ -79,60 +65,47 @@ class Test:
         [
             ({"Agents": [{"Type": "A", "Id": 2}, {"Type": "B", "Id": 4}, {"Type": "B", "Id": "PLACEHOLDER"}]}, [2, 4]),
             (
-                {
-                    "Agents": [
-                        {"Type": "A", "Id": "PLACEHOLDER1"},
-                        {"Type": "B", "Id": "PLACEHOLDER2"},
-                        {"Type": "B", "Id": "PLACEHOLDER3"},
-                    ]
-                },
-                [],
+                    {
+                        "Agents": [
+                            {"Type": "A", "Id": "PLACEHOLDER1"},
+                            {"Type": "B", "Id": "PLACEHOLDER2"},
+                            {"Type": "B", "Id": "PLACEHOLDER3"},
+                        ]
+                    },
+                    [],
             ),
         ],
     )
     def test_get_all_ids_from(self, scenario: dict, expected: list[int]):
-        assert _get_all_ids_from(scenario) == expected
-
-    @pytest.mark.parametrize("defaults, expected", [({"seed": 42}, 42)])
-    def test_get_random_seed__override_default(self, defaults, expected):
-        seed = _get_random_seed(defaults)
-        assert seed == expected
-
-    @pytest.mark.parametrize(
-        "defaults",
-        [
-            {"no_seed_here": "certainly_no_seed"},
-        ],
-    )
-    def test_get_random_seed__default(self, defaults):
-        seed = _get_random_seed(defaults)
-        assert isinstance(seed, int) and 0 <= seed <= time.time_ns()
+        assert get_all_ids_from(scenario) == expected
 
     @pytest.mark.parametrize("values, expected", [("range_int(0; 4)", (0, 4)), ("RaNGE_inT(-10; 30)", (-10, 30))])
     def test_digest_int_range__valid_input(self, values, expected):
-        assert _digest_int_range(values) == expected
+        assert digest_int_range(values) == expected
 
-    @pytest.mark.parametrize("values, expected", [("range_float(0; 4.2)", (0, 4.2)), ("RaNGE_float(-10.999; 30.1)", (-10.999, 30.1))])
+    @pytest.mark.parametrize("values, expected",
+                             [("range_float(0; 4.2)", (0, 4.2)), ("RaNGE_float(-10.999; 30.1)", (-10.999, 30.1))])
     def test_digest_float_range__valid_input(self, values, expected):
-        assert _digest_float_range(values) == expected
+        assert digest_float_range(values) == expected
 
-    @pytest.mark.parametrize("values", ["rnge_int(0; 4)", "range_int[10; 30]"])
+    @pytest.mark.parametrize("values", ["rnge_int(0; 4)", "range_int[10; 30]"])  # noqa
     def test_digest_int_range__invalid_input(self, values):
         with pytest.raises(Exception):
-            _digest_int_range(values)
+            digest_int_range(values)
 
-    @pytest.mark.parametrize("values", ["rnge_float(0.1; 4.2)", "range_float[10.2; 30.4]"])
+    @pytest.mark.parametrize("values", ["rnge_float(0.1; 4.2)", "range_float[10.2; 30.4]"])  # noqa
     def test_digest_float_range__invalid_input(self, values):
         with pytest.raises(Exception):
-            _digest_float_range(values)
+            digest_float_range(values)
 
     @pytest.mark.parametrize("values, expected", [("range_int(0, 4)", "0, 4"), ("RaNgE_int(1, 23", "1, 23")])
     def test_extract_ints_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values, RANGE_INT_IDENTIFIER) == expected
+        assert extract_numbers_from_string(values, RANGE_INT_IDENTIFIER) == expected
 
-    @pytest.mark.parametrize("values, expected", [("range_float(0, 4.0)", "0, 4.0"), ("RaNgE_FlOAT(1.2, 23.2", "1.2, 23.2")])
+    @pytest.mark.parametrize("values, expected",
+                             [("range_float(0, 4.0)", "0, 4.0"), ("RaNgE_FlOAT(1.2, 23.2", "1.2, 23.2")])
     def test_extract_floats_from_string(self, values, expected):
-        assert _extract_numbers_from_string(values, RANGE_FLOAT_IDENTIFIER) == expected
+        assert extract_numbers_from_string(values, RANGE_FLOAT_IDENTIFIER) == expected
 
     @pytest.mark.parametrize(
         "name, agent_n, total_n, expected",
@@ -143,7 +116,7 @@ class Test:
         ],
     )
     def test_get_agent_id(self, name, agent_n, total_n, expected):
-        assert _get_agent_id(name, agent_n, total_n) == expected
+        assert get_agent_id(name, agent_n, total_n) == expected
 
     @pytest.mark.parametrize(
         "values, expected",
@@ -154,4 +127,4 @@ class Test:
         ],
     )
     def test_cast_numeric_strings(self, values, expected):
-        assert _cast_numeric_strings(values) == expected
+        assert cast_numeric_strings(values) == expected

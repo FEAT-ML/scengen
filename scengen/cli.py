@@ -5,7 +5,7 @@
 import argparse
 from enum import Enum, auto
 from pathlib import Path
-from typing import Tuple, Dict, Any, Optional, List
+from typing import Any, Optional
 
 from scengen.logs import LogLevel
 
@@ -65,7 +65,7 @@ Options = {
 }
 
 
-def arg_handling_run(input_args: Optional[List[str]] = None) -> Tuple[Command, Dict[Enum, Any]]:
+def arg_handling_run(input_args: Optional[list[str]] = None) -> tuple[Command, dict[Enum, Any]]:
     """Handles command line arguments for `scengen` and returns `command` and its options `args`"""
     parent_parser = argparse.ArgumentParser(prog="scengen", description=SCENGEN_PARSER)
     parent_parser.add_argument("-lf", "--logfile", type=Path, required=False, help=SCENGEN_LOG_FILE_HELP)
@@ -108,7 +108,7 @@ def resolve_relative_paths(args: dict) -> dict:
     return args
 
 
-def enumify(command: Command, args: dict) -> Dict[Enum, Any]:
+def enumify(command: Command, args: dict) -> dict[Enum, Any]:
     """Matches `args` for given `command` to their respective Enum"""
     result = {}
     for option in GeneralOptions:

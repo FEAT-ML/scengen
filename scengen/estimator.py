@@ -1,8 +1,6 @@
 # SPDX-FileCopyrightText: 2023 German Aerospace Center <amiris@dlr.de>
 #
 # SPDX-License-Identifier: Apache-2.0
-from typing import Tuple
-
 from fameio.source.loader import load_yaml
 
 from scengen.logs import log_and_raise_critical, log
@@ -41,14 +39,14 @@ def get_installed_capacity(scenario: dict) -> dict:
     return installed_power_by_type
 
 
-def extract_storage(agent: dict) -> Tuple[float, str]:
+def extract_storage(agent: dict) -> tuple[float, str]:
     """Return capacity and technology of storage `agent`"""
     capacity = agent["Attributes"][Amiris.identifier_for_storage][Amiris.capacitiy_name_for_storage]
     technology = Amiris.technology_name_for_storage
     return capacity, technology
 
 
-def extract_conventional(agent: dict) -> Tuple[float, str]:
+def extract_conventional(agent: dict) -> tuple[float, str]:
     """Return capacity and technology of conventional `agent`"""
     capacity = agent["Attributes"][Amiris.capacitiy_name]
     if Amiris.energy_carrier_name in agent["Attributes"]:
