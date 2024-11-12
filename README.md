@@ -9,7 +9,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 <!-- [![coverage report](docu/coverage.svg)](https://github.com/FEAT-ML/scenario-generator)  to be enabled once badge is created and stored correctly, see issue #30-->
 
 
-# *Note: `scengen` has been renamed to `AMIRIS-Scengen` and is now hosted at GitLab, see https://gitlab.com/dlr-ve/esy/amiris/amiris-scengen*
+# *Note: `scengen` has been renamed to `AMIRIS-Scengen` and is now hosted at GitLab*
+The documentation below marks the state before the v1.0 release.
+The code in this repository will not be updated or maintained.
+Please refer to the new `AMIRIS-Scengen` repository at [GitLab](https://gitlab.com/dlr-ve/esy/amiris/amiris-scengen).
+
+------------------------------------------------------------------------------------------------
 
 # scengen
 `scengen` is a scenario generator for the open electricity market model [AMIRIS](https://dlr-ve.gitlab.io/esy/amiris/home/).
