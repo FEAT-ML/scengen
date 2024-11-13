@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 <!-- [![coverage report](docu/coverage.svg)](https://github.com/FEAT-ML/scenario-generator)  to be enabled once badge is created and stored correctly, see issue #30-->
 
 
-# *Note: `scengen` has been renamed to `AMIRIS-Scengen` and is now hosted at GitLab*
+# *Note: `scengen` has been renamed to `AMIRIS-Scengen` and is now hosted at [GitLab](https://gitlab.com/dlr-ve/esy/amiris/amiris-scengen)*
 The documentation below marks the state before the v1.0 release.
 The code in this repository will not be updated or maintained.
 Please refer to the new `AMIRIS-Scengen` repository at [GitLab](https://gitlab.com/dlr-ve/esy/amiris/amiris-scengen).
